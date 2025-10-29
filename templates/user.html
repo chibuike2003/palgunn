@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>User Management Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f4f7f9;
+      padding: 2rem;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      color: #2c3e50;
+    }
+
+    .user-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+    }
+
+    .user-table thead {
+      background-color: #ecf0f1;
+      font-weight: bold;
+    }
+
+    .user-table th, .user-table td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid #ecf0f1;
+    }
+
+    .user-table tr:hover {
+      background-color: #f9fbfd;
+    }
+
+    select {
+      padding: 0.4rem 0.6rem;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      background: #fff;
+      font-size: 0.95rem;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.3rem 0.6rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+
+    .bg-green-300 {
+      background-color: #a3e635;
+      color: #2e7d32;
+    }
+
+    .bg-red-300 {
+      background-color: #fca5a5;
+      color: #b91c1c;
+    }
+
+    button {
+      background-color: #3498db;
+      border: none;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #2980b9;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>👤 User Management</h2>
+
+  <table class="user-table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Role</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="collapsible">
+        <td>Jane Doe</td>
+        <td>
+          <select>
+            <option>Student</option>
+            <option>Faculty</option>
+            <option>Admin</option>
+          </select>
+        </td>
+        <td><span class="badge bg-green-300">Active</span></td>
+        <td><button>View Logs</button></td>
+      </tr>
+      <tr class="collapsible">
+        <td>John Smith</td>
+        <td>
+          <select>
+            <option selected>Faculty</option>
+            <option>Student</option>
+            <option>Admin</option>
+          </select>
+        </td>
+        <td><span class="badge bg-red-300">Inactive</span></td>
+        <td><button>View Logs</button></td>
+      </tr>
+    </tbody>
+  </table>
+
+</body>
+</html>

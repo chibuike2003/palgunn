@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ blog.title }} - Our Blog</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+
+    <style>
+        /* Existing CSS styles remain unchanged */
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7f6; /* Light gray background */
+            color: #333; /* Dark text color */
+            line-height: 1.8; /* Improved line height for readability */
+            overflow-x: hidden; /* Prevent horizontal scroll */
+        }
+
+        /* Container for content width */
+        .container {
+            max-width: 900px; /* Slightly narrower container for blog post content */
+            margin: 30px auto; /* More vertical margin */
+            padding: 0 25px; /* More horizontal padding */
+        }
+
+        /* Header Styling */
+        header {
+            background-color: #2c3e50; /* Dark blue-gray */
+            color: #ecf0f1; /* Light text for contrast */
+            padding: 50px 0;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15); /* Subtle shadow */
+            margin-bottom: 40px;
+        }
+
+        header h1 {
+            margin: 0;
+            font-family: 'Playfair Display', serif; /* Elegant font for title */
+            font-size: 3.2em; /* Slightly smaller for single post header */
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+
+        /* Blog Post Detail Styling */
+        .blog-detail {
+            background-color: #fff; /* White background for the post */
+            border-radius: 12px; /* Rounded corners */
+            box-shadow: 0 6px 20px rgba(0,0,0,0.08); /* Softer, larger shadow */
+            padding: 40px; /* Generous padding */
+            line-height: 1.8; /* Good line height for long text */
+        }
+
+        .blog-detail img,
+        .blog-detail video {
+            width: 100%;
+            max-height: 450px; /* Max height for featured image */
+            object-fit: cover;
+            border-radius: 8px; /* Slightly rounded image corners */
+            margin-bottom: 30px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .blog-detail h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.8em; /* Prominent title */
+            color: #34495e; /* Darker blue-gray */
+            margin-top: 0;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .blog-detail .meta {
+            font-size: 1em;
+            color: #7f8c8d;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #f0f0f0;
+            padding-bottom: 15px;
+        }
+
+        .blog-detail .meta span {
+            display: inline-block;
+            margin-right: 25px;
+        }
+
+        .blog-detail p {
+            font-size: 1.15em; /* Larger text for body content */
+            color: #444;
+            margin-bottom: 1.5em; /* Space between paragraphs */
+        }
+
+        /* Back Button Styling */
+        .back-button {
+            display: inline-block;
+            background-color: #7f8c8d; /* Grayish button */
+            color: white;
+            padding: 12px 25px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            margin-top: 40px; /* Space above the button */
+            margin-bottom: 20px; /* Space below the button */
+        }
+
+        .back-button:hover {
+            background-color: #5d6d7e; /* Darker gray on hover */
+            transform: translateY(-2px);
+        }
+
+        /* Footer */
+        footer {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            text-align: center;
+            padding: 40px 0;
+            margin-top: 60px;
+            font-size: 0.95em;
+            box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            header h1 {
+                font-size: 2.8em;
+            }
+            .blog-detail h2 {
+                font-size: 2.4em;
+            }
+            .blog-detail p {
+                font-size: 1.1em;
+            }
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2.2em;
+                padding: 0 10px;
+            }
+            .container {
+                margin: 20px auto;
+                padding: 0 20px;
+            }
+            .blog-detail {
+                padding: 30px;
+            }
+            .blog-detail h2 {
+                font-size: 2em;
+            }
+            .blog-detail .meta {
+                font-size: 0.9em;
+                margin-bottom: 20px;
+            }
+            .blog-detail p {
+                font-size: 1em;
+            }
+            .blog-detail img,
+            .blog-detail video {
+                max-height: 300px;
+            }
+            .back-button {
+                margin-top: 30px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            header h1 {
+                font-size: 1.8em;
+            }
+            .container {
+                padding: 0 15px;
+            }
+            .blog-detail {
+                padding: 20px;
+            }
+            .blog-detail h2 {
+                font-size: 1.7em;
+            }
+            .blog-detail .meta span {
+                display: block; /* Stack meta info on very small screens */
+                margin-bottom: 5px;
+            }
+            .back-button {
+                padding: 10px 20px;
+                font-size: 0.9em;
+            }
+        }
+
+        /* New CSS for Comments Section */
+        .comments-section {
+            margin-top: 60px;
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+            padding: 40px;
+        }
+
+        .comments-section h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2em;
+            color: #34495e;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 15px;
+        }
+
+        .comment-form {
+            margin-bottom: 40px;
+        }
+
+        .comment-form label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .comment-form input[type="text"],
+        .comment-form textarea {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-family: 'Roboto', sans-serif;
+            font-size: 1em;
+            box-sizing: border-box; /* Include padding in width */
+        }
+
+        .comment-form textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .comment-form button {
+            background-color: #28a745; /* Green submit button */
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .comment-form button:hover {
+            background-color: #218838;
+            transform: translateY(-2px);
+        }
+
+        .comment-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .comment-item {
+            background-color: #fcfcfc;
+            border: 1px solid #eee;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .comment-meta {
+            font-size: 0.9em;
+            color: #7f8c8d;
+            margin-bottom: 10px;
+        }
+
+        .comment-meta strong {
+            color: #34495e;
+        }
+
+        .comment-content {
+            font-size: 1em;
+            color: #444;
+            margin-bottom: 15px;
+        }
+
+        .reply-button {
+            background: none;
+            border: none;
+            color: #3498db; /* Blue for reply button */
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+
+        .reply-button:hover {
+            color: #217dbb;
+        }
+
+        .replies {
+            margin-top: 20px;
+            padding-left: 30px; /* Indent replies */
+            border-left: 3px solid #e0e0e0;
+        }
+
+        .reply-form {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            display: none; /* Hidden by default, shown with JavaScript */
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Our Blog</h1>
+        </div>
+    </header>
+
+    <div class="container">
+        {# Back button to return to the main blog list #}
+        <a href="{{ url_for('get_all_blogs') }}" class="back-button">← Back to Blog Posts</a>
+
+        {% if blog %}
+            <div class="blog-detail">
+                {# You can add a featured image here if your blog object has an image_url property #}
+                <img src="https://placehold.co/900x450?text=Blog+Post+{{ blog.id }}" alt="Featured image for {{ blog.title }}" onerror="this.src='https://placehold.co/900x450/cccccc/000000?text=No+Image';" />
+
+                <h2>{{ blog.title }}</h2>
+                <div class="meta">
+                    <span>Date: {{ blog.date_posted.strftime('%B %d, %Y') }}</span>
+                    <span>Author:
+                        {% if blog.author %}
+                            {{ blog.author.username }}
+                        {% else %}
+                            Unknown
+                        {% endif %}
+                    </span>
+                </div>
+                {# Display the full content of the blog post #}
+                <p>{{ blog.content | safe }}</p> {# Using 'safe' filter if content can contain HTML #}
+            </div>
+
+            <div class="comments-section">
+                <h3>Comments</h3>
+
+                <div class="comment-form">
+                    <h4>Leave a Comment</h4>
+                    <form id="commentForm">
+                        <input type="hidden" name="blog_id" value="{{ blog.id }}">
+                        {# Removed: <label for="commenterName">Your Name:</label> #}
+                        {# Removed: <input type="text" id="commenterName" name="name" required> #}
+
+                        <label for="commentContent">Your Comment:</label>
+                        <textarea id="commentContent" name="content" required></textarea>
+
+                        <button type="submit">Post Comment</button>
+                    </form>
+                </div>
+
+                <ul class="comment-list" id="commentList">
+                    {% if comments %}
+                        {% for comment in comments %}
+                            <li class="comment-item" data-comment-id="{{ comment.id }}">
+                                <div class="comment-meta">
+                                    <strong>{{ comment.author_name }}</strong> on {{ comment.date_posted.strftime('%B %d, %Y at %I:%M %p') }}
+                                </div>
+                                <div class="comment-content">
+                                    <p>{{ comment.content }}</p>
+                                </div>
+                                <button class="reply-button" onclick="toggleReplyForm(this)">Reply</button>
+
+                                <div class="reply-form" id="replyForm-{{ comment.id }}">
+                                    <form class="replyToCommentForm">
+                                        <input type="hidden" name="parent_id" value="{{ comment.id }}">
+                                        {# Removed: <label for="replyerName-{{ comment.id }}">Your Name:</label> #}
+                                        {# Removed: <input type="text" id="replyerName-{{ comment.id }}" name="name" required> #}
+
+                                        <label for="replyContent-{{ comment.id }}">Your Reply:</label>
+                                        <textarea id="replyContent-{{ comment.id }}" name="content" required></textarea>
+
+                                        <button type="submit">Post Reply</button>
+                                    </form>
+                                </div>
+
+                                {% if comment.replies %}
+                                    <ul class="replies">
+                                        {% for reply in comment.replies %}
+                                            <li class="comment-item">
+                                                <div class="comment-meta">
+                                                    <strong>{{ reply.author_name }}</strong> on {{ reply.date_posted.strftime('%B %d, %Y at %I:%M %p') }} (reply to {{ comment.author_name }})
+                                                </div>
+                                                <div class="comment-content">
+                                                    <p>{{ reply.content }}</p>
+                                                </div>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    {% else %}
+                        <p>No comments yet. Be the first to comment!</p>
+                    {% endif %}
+                </ul>
+            </div>
+
+        {% else %}
+            <div class="no-blogs">
+                <p>Blog post not found.</p>
+                <p>Please check the URL or return to the <a href="{{ url_for('index') }}">main blog page</a>.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Our Blog. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        function toggleReplyForm(button) {
+            const commentItem = button.closest('.comment-item');
+            const replyForm = commentItem.querySelector('.reply-form');
+            if (replyForm) {
+                replyForm.style.display = replyForm.style.display === 'block' ? 'none' : 'block';
+            }
+        }
+
+        // --- JavaScript for handling form submissions (conceptual) ---
+
+        // Handle main comment form submission
+        document.getElementById('commentForm').addEventListener('submit', async function(event) {
+            event.preventDefault(); // Prevent default form submission
+
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData.entries());
+            data.blog_id = {{ blog.id }}; // Ensure blog_id is sent
+
+            // Since the name input is removed, you'll need a way to get the author's name.
+            // This usually means the user needs to be logged in, and their username
+            // would be automatically sent from the backend or retrieved from a session/cookie.
+            // For now, I'll set a placeholder. In a real app, replace this with actual user data.
+            data.name = 'Anonymous User'; // <<< IMPORTANT: Replace with actual logged-in user's name or 'Guest'
+
+            try {
+                const response = await fetch('/api/comments', { // Replace with your actual API endpoint
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
+                });
+
+                if (response.ok) {
+                    const newComment = await response.json();
+                    // Dynamically add the new comment to the list
+                    addCommentToDOM(newComment);
+                    this.reset(); // Clear the form
+                } else {
+                    alert('Failed to post comment.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while posting the comment.');
+            }
+        });
+
+        // Handle reply form submissions (delegated event listener)
+        document.getElementById('commentList').addEventListener('submit', async function(event) {
+            if (event.target.classList.contains('replyToCommentForm')) {
+                event.preventDefault(); // Prevent default form submission
+
+                const formData = new FormData(event.target);
+                const data = Object.fromEntries(formData.entries());
+                data.blog_id = {{ blog.id }}; // Ensure blog_id is sent
+
+                // Similar to the main comment form, replace with actual user data
+                data.name = 'Anonymous Replier'; // <<< IMPORTANT: Replace with actual logged-in user's name or 'Guest'
+
+                try {
+                    const response = await fetch('/api/comments', { // Replace with your actual API endpoint
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(data),
+                    });
+
+                    if (response.ok) {
+                        const newReply = await response.json();
+                        // Dynamically add the new reply to the correct parent comment
+                        addReplyToDOM(newReply);
+                        event.target.reset(); // Clear the form
+                        toggleReplyForm(event.target.closest('.comment-item').querySelector('.reply-button')); // Hide reply form
+                    } else {
+                        alert('Failed to post reply.');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('An error occurred while posting the reply.');
+                }
+            }
+        });
+
+        // Function to dynamically add a new comment to the DOM
+        function addCommentToDOM(comment) {
+            const commentList = document.getElementById('commentList');
+            const newCommentItem = document.createElement('li');
+            newCommentItem.classList.add('comment-item');
+            newCommentItem.setAttribute('data-comment-id', comment.id);
+
+            const commentDate = new Date(comment.date_posted).toLocaleString('en-US', {
+                month: 'long', day: 'numeric', year: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true
+            });
+
+            newCommentItem.innerHTML = `
+                <div class="comment-meta">
+                    <strong>${comment.author_name}</strong> on ${commentDate}
+                </div>
+                <div class="comment-content">
+                    <p>${comment.content}</p>
+                </div>
+                <button class="reply-button" onclick="toggleReplyForm(this)">Reply</button>
+                <div class="reply-form" id="replyForm-${comment.id}">
+                    <form class="replyToCommentForm">
+                        <input type="hidden" name="parent_id" value="${comment.id}">
+                        {# Removed: <label for="replyerName-${comment.id}">Your Name:</label> #}
+                        {# Removed: <input type="text" id="replyerName-${comment.id}" name="name" required> #}
+
+                        <label for="replyContent-${comment.id}">Your Reply:</label>
+                        <textarea id="replyContent-${comment.id}" name="content" required></textarea>
+
+                        <button type="submit">Post Reply</button>
+                    </form>
+                </div>
+                <ul class="replies"></ul> `;
+            commentList.prepend(newCommentItem); // Add new comment at the top
+        }
+
+        // Function to dynamically add a new reply to the DOM
+        function addReplyToDOM(reply) {
+            const parentCommentItem = document.querySelector(`.comment-item[data-comment-id="${reply.parent_id}"]`);
+            if (parentCommentItem) {
+                let repliesList = parentCommentItem.querySelector('.replies');
+                if (!repliesList) {
+                    repliesList = document.createElement('ul');
+                    repliesList.classList.add('replies');
+                    parentCommentItem.appendChild(repliesList);
+                }
+
+                const newReplyItem = document.createElement('li');
+                newReplyItem.classList.add('comment-item');
+
+                const replyDate = new Date(reply.date_posted).toLocaleString('en-US', {
+                    month: 'long', day: 'numeric', year: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true
+                });
+
+                // You'll need to fetch the parent comment's author name from your backend or pass it
+                // For now, I'm assuming reply.parent_author_name is sent from the backend
+                const parentAuthorName = reply.parent_author_name || 'Original Commenter';
+
+                newReplyItem.innerHTML = `
+                    <div class="comment-meta">
+                        <strong>${reply.author_name}</strong> on ${replyDate} (reply to ${parentAuthorName})
+                    </div>
+                    <div class="comment-content">
+                        <p>${reply.content}</p>
+                    </div>
+                `;
+                repliesList.appendChild(newReplyItem);
+            }
+        }
+
+        // Initial check for no comments
+        document.addEventListener('DOMContentLoaded', () => {
+            const commentList = document.getElementById('commentList');
+            // Check if there are any existing comments rendered by the backend
+            const existingCommentItems = commentList.querySelectorAll('.comment-item');
+            if (existingCommentItems.length === 0) {
+                const noCommentsParagraph = document.createElement('p');
+                noCommentsParagraph.textContent = 'No comments yet. Be the first to comment!';
+                commentList.appendChild(noCommentsParagraph);
+            }
+        });
+
+    </script>
+</body>
+</html>

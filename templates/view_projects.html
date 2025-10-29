@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Submitted Project Ideas</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f7fa;
+            color: #333;
+        }
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 30px;
+            background-color: #ffffff;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+        }
+        h1 {
+            text-align: center;
+            color: #1a237e;
+            font-size: 2.8em;
+            margin-bottom: 30px;
+            position: relative;
+            padding-bottom: 15px;
+        }
+        h1::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            bottom: 0;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background-color: #007bff;
+            border-radius: 5px;
+        }
+        .project-card {
+            background-color: #f9f9f9;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 25px;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .project-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+        .project-card h2 {
+            color: #007bff;
+            margin-top: 0;
+            font-size: 1.8em;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        .project-card p {
+            margin-bottom: 10px;
+        }
+        .project-card strong {
+            color: #555;
+        }
+        .project-card .label {
+            font-weight: bold;
+            color: #4a4a4a;
+        }
+        .project-card ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .project-card ul li {
+            background-color: #eaf6ff;
+            border-left: 4px solid #007bff;
+            padding: 8px 15px;
+            margin-bottom: 8px;
+            border-radius: 4px;
+        }
+        .no-projects {
+            text-align: center;
+            color: #777;
+            font-style: italic;
+            padding: 50px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .file-list {
+            list-style-type: disc;
+            padding-left: 20px;
+            margin-top: 5px;
+        }
+        .file-list li a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .file-list li a:hover {
+            text-decoration: underline;
+        }
+        .back-button {
+            display: block;
+            width: fit-content;
+            margin: 20px auto;
+            padding: 10px 20px;
+            background-color: #6c757d; /* Gray */
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+        .back-button:hover {
+            background-color: #5a6268;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>My Submitted Project Ideas</h1>
+
+        {% if project_ideas %}
+            {% for idea in project_ideas %}
+                <div class="project-card">
+                    <h2>{{ idea.title }}</h2>
+                    <p><span class="label">Submitted On:</span> {{ idea.submission_date.strftime('%Y-%m-%d %H:%M') }}</p>
+                    <p><span class="label">Contact Email:</span> {{ idea.contact_email }}</p>
+                    <p><span class="label">Description:</span> {{ idea.description }}</p>
+                    
+                    {% if idea.innovations %}
+                        <p><span class="label">Key Innovations:</span></p>
+                        <p>{{ idea.innovations }}</p>
+                    {% endif %}
+
+                    {% if idea.file_paths %}
+                        <p><span class="label">Supporting Files:</span></p>
+                        <ul class="file-list">
+                            {# Split the comma-separated file_paths and iterate #}
+                            {% for file_path in idea.file_paths.split(',') %}
+                                <li><a href="{{ url_for('static', filename='project_uploads/' + file_path.strip()) }}" target="_blank">{{ file_path.strip() }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="no-projects">
+                <p>You haven't submitted any project ideas yet.</p>
+                <p>Why not <a href="{{ url_for('index') }}">submit your first idea</a> now?</p>
+            </div>
+        {% endif %}
+
+        <a href="{{ url_for('index') }}" class="back-button">Back to Submit Idea</a>
+    </div>
+</body>
+</html>

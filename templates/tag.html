@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tag & Search</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f3f4f8;
+            padding: 30px;
+        }
+        .search-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .search-container input {
+            padding: 10px;
+            width: 300px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .tag {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .results {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-top: 30px;
+        }
+        .result-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .result-card:hover {
+            transform: scale(1.05);
+            transition: 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="search-container">
+        <input type="text" placeholder="Search Projects">
+        <div class="tags">
+            <div class="tag">AI</div>
+            <div class="tag">Data Science</div>
+            <div class="tag">Web Development</div>
+        </div>
+    </div>
+
+    <div class="results">
+        <div class="result-card">Project 1</div>
+        <div class="result-card">Project 2</div>
+        <div class="result-card">Project 3</div>
+    </div>
+</body>
+</html>

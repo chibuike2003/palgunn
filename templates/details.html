@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: #f8f9fa;
+            font-family: 'Inter', sans-serif; /* Changed to Inter for consistency */
+        }
+
+        .dashboard-header {
+            background-color: #0d6efd;
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+            margin-bottom: 40px;
+        }
+
+        .dashboard-header h1 {
+            font-weight: bold;
+        }
+
+        .modal-table th {
+            background-color: #0d6efd;
+            color: white;
+        }
+
+        .card-style {
+            transition: transform 0.2s ease;
+            cursor: pointer;
+        }
+
+        .card-style:hover {
+            transform: scale(1.02);
+        }
+
+        .modal-content {
+            border-radius: 15px;
+        }
+
+        .modal-header {
+            background-color: #0d6efd;
+            color: white;
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+        }
+
+        .table-striped > tbody > tr:nth-of-type(odd) {
+            background-color: #f2f7ff;
+        }
+        /* Style for new card to make it fit */
+        .card-container {
+            margin-bottom: 2rem; /* Spacing between rows of cards */
+        }
+    </style>
+</head>
+<body>
+
+<div class="dashboard-header">
+    <h1>📊 Admin Dashboard</h1>
+    <p class="lead">Manage candidates, users, and results efficiently</p>
+</div>
+
+<div class="container card-container"> {# Added card-container for potential spacing #}
+    <div class="row text-center g-4">
+
+        <div class="col-md-4">
+            <div class="card card-style shadow-sm p-4" data-bs-toggle="modal" data-bs-target="#modalOne">
+                <h5 class="text-primary fw-bold">Users On The Platform</h5>
+                <p class="text-muted">List of all registered Users</p>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card card-style shadow-sm p-4" data-bs-toggle="modal" data-bs-target="#modalTwo">
+                <h5 class="text-primary fw-bold">People That Voted</h5>
+                <p class="text-muted">Voters that Exercised Their Franchise</p>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card card-style shadow-sm p-4" data-bs-toggle="modal" data-bs-target="#modalThree">
+                <h5 class="text-primary fw-bold">People That Have Paid Departmental Dues Results</h5>
+                <p class="text-muted">Departmental Dues History</p>
+            </div>
+        </div>
+
+        {# NEW CARD FOR LECTURERS #}
+        <div class="col-md-4 mx-auto"> {# Using mx-auto to center if it's the only one in its row #}
+            <div class="card card-style shadow-sm p-4" data-bs-toggle="modal" data-bs-target="#modalLecturers">
+                <h5 class="text-primary fw-bold">Registered Lecturers</h5>
+                <p class="text-muted">View all lecturers who created an account</p>
+            </div>
+        </div>
+        {# END NEW CARD #}
+
+    </div>
+</div>
+
+<div class="container py-5">
+    <div class="row g-4">
+        <hr>
+        <h2 class="mt-5 mb-3">Manage Users</h2>
+        <div class="col-12">
+            <div class="card dashboard-card p-4">
+                <div class="card-body">
+                    <h5 class="card-title">All Registered Users (Students)</h5>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Username</th>
+                                    <th>Email</th>
+                                    <th>Full Name</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in users %}
+                                <tr>
+                                    <td>{{ user.id }}</td>
+                                    <td>{{ user.username }}</td>
+                                    <td>{{ user.email }}</td>
+                                    <td>{{ user.fullname }}</td> {# Assuming User model has a 'fullname' attribute #}
+                                    <td>
+                                        <a href="{{ url_for('admin_edit_user', user_id=user.id) }}" class="btn btn-warning btn-sm me-2">
+                                            <i class="bi bi-pencil"></i> Edit
+                                        </a>
+                                        <form action="{{ url_for('admin_delete_user', user_id=user.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this user?');">
+                                            <button type="submit" class="btn btn-danger btn-sm">
+                                                <i class="bi bi-trash"></i> Delete
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="5">No users found.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h2 class="mt-5 mb-3">Manage Lecturers</h2>
+        <div class="col-12">
+            <div class="card dashboard-card p-4">
+                <div class="card-body">
+                    <h5 class="card-title">All Registered Lecturers</h5>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Full Name</th>
+                                    <th>Email</th>
+                                    <th>Staff ID</th> {# Assuming Lecturer model has 'staff_id' #}
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for lecturer in lecturers %}
+                                <tr>
+                                    <td>{{ lecturer.id }}</td>
+                                    <td>{{ lecturer.fullname }}</td> {# Assuming Lecturer model has a 'fullname' attribute #}
+                                    <td>{{ lecturer.email }}</td>
+                                    <td>{{ lecturer.staff_id }}</td> {# Placeholder, adjust to your Lecturer model's attributes #}
+                                    <td>
+                                        <a href="{{ url_for('admin_edit_lecturer', lecturer_id=lecturer.id) }}" class="btn btn-warning btn-sm me-2">
+                                            <i class="bi bi-pencil"></i> Edit
+                                        </a>
+                                        <form action="{{ url_for('admin_delete_lecturer', lecturer_id=lecturer.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this lecturer?');">
+                                            <button type="submit" class="btn btn-danger btn-sm">
+                                                <i class="bi bi-trash"></i> Delete
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="5">No lecturers found.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h2 class="mt-5 mb-3">Manage Voters</h2>
+        <div class="col-12">
+            <div class="card dashboard-card p-4">
+                <div class="card-body">
+                    <h5 class="card-title">Users Who Have Voted</h5>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Username</th>
+                                    <th>Email</th>
+                                    <th>Full Name</th>
+                                    <th>Actions</th> {# You might not want direct edit/delete for voters in this context, but if you do, add routes #}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for voter in voters %}
+                                <tr>
+                                    <td>{{ voter.id }}</td>
+                                    <td>{{ voter.username }}</td>
+                                    <td>{{ voter.email }}</td>
+                                    <td>{{ voter.fullname }}</td>
+                                    <td>
+                                        <span class="text-muted">Managed via User Edit</span>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="5">No voters found.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h2 class="mt-5 mb-3">Manage Dues Payers</h2>
+        <div class="col-12">
+            <div class="card dashboard-card p-4">
+                <div class="card-body">
+                    <h5 class="card-title">Users Who Have Paid Dues</h5>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Username</th>
+                                    <th>Email</th>
+                                    <th>Full Name</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for dues_payer in dues_payers %}
+                                <tr>
+                                    <td>{{ dues_payer.id }}</td>
+                                    <td>{{ dues_payer.username }}</td>
+                                    <td>{{ dues_payer.email }}</td>
+                                    <td>{{ dues_payer.fullname }}</td>
+                                    <td>
+                                        <span class="text-muted">Managed via User Edit</span>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="5">No dues payers found.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h2 class="mt-5 mb-3">Manage Electoral Candidates</h2>
+        <div class="col-12">
+            <div class="card dashboard-card p-4">
+                <div class="card-body">
+                    <h5 class="card-title">Electoral Candidates</h5>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Candidate Name</th>
+                                    <th>Position</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for candidate in candidates %}
+                                <tr>
+                                    <td>{{ candidate.id }}</td>
+                                    <td>{{ candidate.user.fullname }}</td> {# Assuming candidate has a relationship to User #}
+                                    <td>{{ candidate.position }}</td> {# Assuming candidate has a 'position' attribute #}
+                                    <td>
+                                        <a href="{{ url_for('admin_edit_candidate', candidate_id=candidate.id) }}" class="btn btn-warning btn-sm me-2">
+                                            <i class="bi bi-pencil"></i> Edit
+                                        </a>
+                                        <form action="{{ url_for('admin_delete_candidate', candidate_id=candidate.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this candidate?');">
+                                            <button type="submit" class="btn btn-danger btn-sm">
+                                                <i class="bi bi-trash"></i> Delete
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="4">No candidates found.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{# Modals start here #}
+
+<div class="modal fade" id="modalOne" tabindex="-1" aria-labelledby="modalOneLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalOneLabel">🧑‍💼 Registered Users</h5>
+          <button type="button" class="btn-close bg-light" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            {% if users %} {# Check if 'users' variable exists and is not empty #}
+          <table class="table table-striped modal-table">
+            <thead>
+              <tr>
+                <th>Full Name</th>
+                <th>Email</th>
+                <th>Reg No</th>
+                <th>Phone</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for user in users %}
+                <tr>
+                  <td>{{ user.fullname if user.fullname else 'N/A' }}</td>
+                  <td>{{ user.email }}</td>
+                  <td>{{ user.regno if user.regno else 'N/A' }}</td> {# Assuming 'regno' might be an attribute of User #}
+                  <td>{{ user.phone if user.phone else 'N/A' }}</td> {# Assuming 'phone' might be an attribute of User #}
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+            {% else %}
+            <p class="text-muted text-center">No registered users found.</p>
+            {% endif %}
+        </div>
+      </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalTwo" tabindex="-1" aria-labelledby="modalTwoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalTwoLabel">🗳️ Voters</h5>
+          <button type="button" class="btn-close bg-light" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            {% if voters %}
+          <table class="table table-striped modal-table">
+            <thead>
+              <tr>
+                <th>Full Name</th>
+                <th>Email</th>
+                <th>Reg No</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for voter in voters %}
+                <tr>
+                  <td>{{ voter.fullname if voter.fullname else 'N/A' }}</td>
+                  <td>{{ voter.email }}</td>
+                  <td>{{ voter.regno if voter.regno else 'N/A' }}</td> {# Assuming 'regno' might be an attribute of Voter #}
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+            {% else %}
+            <p class="text-muted text-center">No voters found.</p>
+            {% endif %}
+        </div>
+      </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalThree" tabindex="-1" aria-labelledby="modalThreeLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalThreeLabel">💰 Departmental Dues Payers</h5>
+          <button type="button" class="btn-close bg-light" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            {% if dues_payers %}
+          <table class="table table-striped modal-table">
+            <thead>
+              <tr>
+                <th>Full Name</th>
+                <th>Reg No</th>
+                <th>Sessions Paid</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for user in dues_payers %}
+                {% for record in user.adminadddues %} {# This assumes a relationship is set up #}
+                <tr>
+                  <td>{{ user.fullname if user.fullname else 'N/A' }}</td>
+                  <td>{{ record.regno if record.regno else 'N/A' }}</td> {# Assuming 'regno' is on AdminAddDues record #}
+                  <td>{{ record.sessions_paid if record.sessions_paid else 'N/A' }}</td>
+                  <td>{{ record.date_filled.strftime("%Y-%m-%d") if record.date_filled else 'N/A' }}</td>
+                </tr>
+                {% endfor %}
+              {% endfor %}
+            </tbody>
+          </table>
+            {% else %}
+            <p class="text-muted text-center">No departmental dues payers found.</p>
+            {% endif %}
+        </div>
+      </div>
+    </div>
+</div>
+
+{# NEW MODAL FOR LECTURERS #}
+<div class="modal fade" id="modalLecturers" tabindex="-1" aria-labelledby="modalLecturersLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable"> {# Changed to modal-xl for more columns #}
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalLecturersLabel">👩‍🏫 Registered Lecturers</h5>
+                <button type="button" class="btn-close bg-light" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                {% if lecturers %} {# Check if 'lecturers' variable exists and is not empty #}
+                <div class="table-responsive"> {# Added table-responsive for better overflow handling #}
+                    <table class="table table-striped modal-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Full Name</th>
+                                <th>Email</th>
+                                <th>Staff ID</th>
+                                <th>Department</th>
+                                <th>Phone Number</th>
+                                <th>State of Origin</th>
+                                <th>LGA</th>
+                                <th>Home Address</th>
+                                {# Uncomment if you plan to display profile pictures #}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for lecturer in lecturers %}
+                            <tr>
+                                <td>{{ lecturer.id }}</td>
+                                <td>{{ lecturer.full_name }}</td>
+                                <td>{{ lecturer.email }}</td>
+                                <td>{{ lecturer.staff_id }}</td>
+                                <td>{{ lecturer.department }}</td>
+                                <td>{{ lecturer.phone_number if lecturer.phone_number else 'N/A' }}</td>
+                                <td>{{ lecturer.state_of_origin if lecturer.state_of_origin else 'N/A' }}</td>
+                                <td>{{ lecturer.lga if lecturer.lga else 'N/A' }}</td>
+                                <td>{{ lecturer.home_address if lecturer.home_address else 'N/A' }}</td>
+                                {# Uncomment if you plan to display profile pictures #}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted text-center">No lecturers have created an account yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{# END NEW MODAL #}
+
+{# Admin Logout Button #}
+<div class="container text-center mt-5">
+    <a href="{{ url_for('admin_logout') }}" class="btn btn-danger">Admin Logout</a> {# Assuming you have an admin_logout route #}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

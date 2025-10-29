@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard: Publish Results</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter for a modern, clean look -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Apply the Inter font globally */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Light gray background for the body */
+        }
+        /* Custom styles for the main card container */
+        .card {
+            border-radius: 1.5rem; /* Large rounded corners for a soft look */
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1); /* Deeper shadow for depth */
+        }
+        /* Styling for input and select fields */
+        .form-input, .form-select {
+            border-radius: 0.75rem; /* Medium rounded corners for inputs */
+            padding: 0.75rem 1rem; /* Generous padding */
+            border: 1px solid #d1d5db; /* Light gray border */
+            width: 100%; /* Full width within their container */
+            transition: all 0.2s ease-in-out; /* Smooth transition for focus states */
+        }
+        .form-input:focus, .form-select:focus {
+            border-color: #3b82f6; /* Blue border on focus */
+            outline: none; /* Remove default outline */
+            box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.4); /* Custom blue ring shadow on focus */
+        }
+        /* Styling for the primary submit button */
+        .btn-primary {
+            border-radius: 0.75rem; /* Matching rounded corners */
+            padding: 0.85rem 2rem; /* Comfortable padding */
+            font-weight: 700; /* Bold text */
+            background-image: linear-gradient(to right, #4f46e5, #6366f1); /* Gradient background for a modern look */
+            transition: all 0.2s ease-in-out; /* Smooth transition for hover effects */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+        }
+        .btn-primary:hover {
+            background-image: linear-gradient(to right, #4338ca, #4f46e5); /* Slightly darker gradient on hover */
+            transform: translateY(-2px); /* Slight lift effect on hover */
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2); /* Enhanced shadow on hover */
+        }
+        /* Styling for flash messages */
+        .flash-message {
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            font-weight: 500;
+            display: flex; /* Use flexbox for icon alignment */
+            align-items: center; /* Vertically center content */
+        }
+        .flash-icon {
+            margin-right: 0.75rem; /* Space between icon and text */
+            font-size: 1.25rem; /* Larger icon size */
+        }
+        .flash-success {
+            background-color: #d1fae5; /* Light green */
+            color: #065f46; /* Dark green text */
+            border: 1px solid #10b981;
+        }
+        .flash-danger {
+            background-color: #fee2e2; /* Light red */
+            color: #991b1b; /* Dark red text */
+            border: 1px solid #ef4444;
+        }
+        .flash-info {
+            background-color: #e0f2fe; /* Light blue */
+            color: #0c4a6e; /* Dark blue text */
+            border: 1px solid #38bdf8;
+        }
+        .flash-warning {
+            background-color: #fffacd; /* Light yellow */
+            color: #92400e; /* Dark yellow text */
+            border: 1px solid #f59e0b;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4 sm:p-6 lg:p-8">
+    <div class="max-w-4xl w-full bg-white card p-8 sm:p-10 lg:p-12">
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-6 text-center">
+            <span class="text-blue-600">Admin</span>: Publish Results 🚀
+        </h1>
+        <p class="text-gray-600 text-lg mb-8 text-center leading-relaxed">
+            Use this form to schedule the publication of student results. Select the student registration prefix,
+            academic year, semester, and the precise publication window.
+        </p>
+
+        <!-- Flash Messages Display -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="mb-6">
+                    {% for category, message in messages %}
+                        <div class="flash-message flash-{{ category }}">
+                            {% if category == 'success' %}<span class="flash-icon">✅</span>{% endif %}
+                            {% if category == 'danger' %}<span class="flash-icon">❌</span>{% endif %}
+                            {% if category == 'info' %}<span class="flash-icon">ℹ️</span>{% endif %}
+                            {% if category == 'warning' %}<span class="flash-icon">⚠️</span>{% endif %}
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Publication Form -->
+        <form method="POST" action="{{ url_for('publish_results_admin') }}" class="space-y-7">
+            <!-- Registration Number Prefix -->
+            <div>
+                <label for="reg_prefix" class="block text-gray-800 text-base font-semibold mb-2">
+                    Registration Number Prefix
+                </label>
+                <input type="text" id="reg_prefix" name="reg_prefix" placeholder="e.g., 2021, FUPRE/UG/ENG/2022"
+                       class="form-input" required aria-label="Registration Number Prefix">
+                <p class="mt-2 text-sm text-gray-500">
+                    Enter the starting digits or characters of the registration numbers to filter students (e.g., "2021" for all 2021 intake students).
+                </p>
+            </div>
+
+            <!-- Year and Semester Selection -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="year" class="block text-gray-800 text-base font-semibold mb-2">
+                        Academic Year
+                    </label>
+                    <select id="year" name="year" class="form-select" required aria-label="Academic Year">
+                        <option value="">Select Academic Year</option>
+                        {% for year in years %}
+                            <option value="{{ year }}">{{ year }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label for="semester" class="block text-gray-800 text-base font-semibold mb-2">
+                        Semester
+                    </label>
+                    <select id="semester" name="semester" class="form-select" required aria-label="Semester">
+                        <option value="">Select Semester</option>
+                        {% for semester in semesters %}
+                            <option value="{{ semester }}">{{ semester }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <!-- Publication Date and Time Range -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="publication_date" class="block text-gray-800 text-base font-semibold mb-2">
+                        Publication Start Date and Time
+                    </label>
+                    <input type="datetime-local" id="publication_date" name="publication_date"
+                           class="form-input" required aria-label="Publication Start Date and Time">
+                    <p class="mt-2 text-sm text-gray-500">
+                        Results will become visible to students exactly from this date and time.
+                    </p>
+                </div>
+                <div>
+                    <label for="end_publication_date" class="block text-gray-800 text-base font-semibold mb-2">
+                        Publication End Date and Time
+                    </label>
+                    <input type="datetime-local" id="end_publication_date" name="end_publication_date"
+                           class="form-input" required aria-label="Publication End Date and Time">
+                    <p class="mt-2 text-sm text-gray-500">
+                        Results will no longer be accessible to students after this date and time.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit"
+                    class="w-full btn-primary text-white py-3 px-6 text-xl focus:outline-none focus:ring-4 focus:ring-blue-300">
+                Publish Results
+            </button>
+        </form>
+    </div>
+</body>
+</html>

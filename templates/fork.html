@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fork & Collaborate - Build Together, Better</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="style.css">
+    
+</head>
+<style>
+    /* General Body and Typography */
+body {
+    font-family: 'Poppins', sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    color: #333;
+    background-color: #f8f9fa; /* Light background for the page */
+}
+
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+h1, h2, h3 {
+    color: #2c3e50; /* Darker heading color */
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+h1 {
+    font-size: 3em;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+h2 {
+    font-size: 2.2em;
+    text-align: center;
+    margin-bottom: 40px;
+    position: relative;
+    padding-bottom: 10px;
+}
+
+/* Underline effect for H2 */
+h2::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 4px;
+    background-color: #4CAF50; /* Primary green */
+    border-radius: 2px;
+}
+
+h3 {
+    font-size: 1.5em;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+p {
+    margin-bottom: 1em;
+    font-weight: 300; /* Lighter weight for body text */
+}
+
+strong {
+    font-weight: 600;
+    color: #4CAF50; /* Highlight strong text with green */
+}
+
+/* Hero Section */
+.hero-section {
+    background: linear-gradient(135deg, #4CAF50 0%, #2e7d32 100%); /* Green gradient */
+    color: #fff;
+    padding: 100px 0;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.hero-section .tagline {
+    font-size: 1.2em;
+    max-width: 800px;
+    margin: 20px auto 0;
+    font-weight: 300;
+}
+
+/* Section Blocks */
+.section-block {
+    padding: 80px 0;
+    border-bottom: 1px solid #eee; /* Subtle separator */
+}
+
+.section-block:last-of-type {
+    border-bottom: none;
+}
+
+.section-block.bg-light {
+    background-color: #e8f5e9; /* Lighter green tint for alternating sections */
+}
+
+/* Feature Lists (ul and ol) */
+.feature-list, .steps-list {
+    list-style: none;
+    padding: 0;
+    margin: 40px 0;
+    display: grid;
+    gap: 30px;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Responsive grid */
+}
+
+.feature-list li, .steps-list li {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.feature-list li:hover, .steps-list li:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+}
+
+.steps-list li h3 {
+    color: #2e7d32; /* Darker green for step numbers */
+}
+
+/* Icons within content */
+.icon-left {
+    margin-right: 10px;
+    color: #4CAF50; /* Primary green */
+}
+
+.icon-feature {
+    color: #2e7d32; /* Darker green for feature icons */
+    font-size: 1.2em;
+    margin-right: 8px;
+}
+
+.icon-step {
+    color: #4CAF50; /* Primary green for step icons */
+    font-size: 1em; /* Adjust size to fit with text */
+    margin-right: 8px;
+}
+
+
+/* Call to Action (CTA) Section */
+.cta-section {
+    background: #2c3e50; /* Dark blue/grey background */
+    color: #fff;
+    padding: 80px 0;
+    text-align: center;
+}
+
+.cta-section p {
+    font-size: 1.3em;
+    max-width: 800px;
+    margin: 0 auto 30px;
+}
+
+.cta-section strong {
+    color: #69f0ae; /* Lighter green for strong text in dark section */
+}
+
+.btn {
+    display: inline-block;
+    background-color: #69f0ae; /* Bright green button */
+    color: #2c3e50; /* Dark text for button */
+    padding: 15px 35px;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 1.1em;
+    transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease; /* Added box-shadow to transition */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.btn:hover {
+    background-color: #00e676; /* Slightly darker green on hover */
+    transform: translateY(-2px);
+    box-shadow: 0 7px 20px rgba(0, 0, 0, 0.3); /* Enhanced shadow on hover */
+}
+
+.btn-icon-right {
+    margin-left: 10px;
+    transition: transform 0.3s ease; /* Smooth icon movement */
+}
+
+.btn:hover .btn-icon-right {
+    transform: translateX(5px); /* Move icon slightly on hover */
+}
+
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    h1 {
+        font-size: 2.5em;
+    }
+
+    h2 {
+        font-size: 1.8em;
+    }
+
+    h3 {
+        font-size: 1.3em;
+    }
+
+    .hero-section {
+        padding: 80px 0;
+    }
+
+    .section-block {
+        padding: 60px 0;
+    }
+
+    .feature-list, .steps-list {
+        grid-template-columns: 1fr; /* Stack columns on smaller screens */
+    }
+
+    .cta-section {
+        padding: 60px 0;
+    }
+
+    .cta-section p {
+        font-size: 1.1em;
+    }
+}
+
+@media (max-width: 480px) {
+    h1 {
+        font-size: 2em;
+    }
+
+    h2 {
+        font-size: 1.6em;
+    }
+
+    .container {
+        padding: 0 15px;
+    }
+
+    .hero-section .tagline {
+        font-size: 1em;
+    }
+
+    .btn {
+        padding: 12px 25px;
+        font-size: 1em;
+    }
+}
+</style>
+<body>
+    <header class="hero-section">
+        <div class="container">
+            <h1>Fork & Collaborate: Build Together, Better.</h1>
+            <p class="tagline">Imagine a world where the best ideas are never stagnant, where every groundbreaking project is a launchpad for the next. With Fork & Collaborate, that world is here. We empower you to take existing projects, adapt them, and build upon them, fostering a vibrant ecosystem of shared innovation.</p>
+        </div>
+    </header>
+
+    <main>
+        <section class="section-block">
+            <div class="container">
+                <h2><i class="fas fa-code-branch icon-left"></i> Why Fork? Your Vision, Unleashed.</h2>
+                <p>Forking isn't just copying; it's <strong>cloning an idea to cultivate your own version</strong>. Think of it as:</p>
+                <ul class="feature-list">
+                    <li>
+                        <h3><i class="fas fa-sliders-h icon-feature"></i> Customization</h3>
+                        <p>Tailor a project to your specific needs without starting from scratch.</p>
+                    </li>
+                    <li>
+                        <h3><i class="fas fa-flask icon-feature"></i> Experimentation</h3>
+                        <p>Test new features, explore different directions, or try out radical changes in a safe, isolated environment.</p>
+                    </li>
+                    <li>
+                        <h3><i class="fas fa-brain icon-feature"></i> Learning & Growth</h3>
+                        <p>Dive deep into existing codebases, understand how successful projects are built, and refine your skills by contributing to something tangible.</p>
+                    </li>
+                </ul>
+                <p>It's your chance to iterate, innovate, and make an established idea uniquely yours.</p>
+            </div>
+        </section>
+
+        <section class="section-block bg-light">
+            <div class="container">
+                <h2><i class="fas fa-handshake icon-left"></i> Why Collaborate? Multiply Your Impact.</h2>
+                <p>No great feat was ever achieved alone. Collaboration transforms individual efforts into collective triumphs. When you fork, you also open the door to:</p>
+                <ul class="feature-list">
+                    <li>
+                        <h3><i class="fas fa-users-cog icon-feature"></i> Shared Expertise</h3>
+                        <p>Bring together diverse skills and perspectives. A bug that stumps one person might be a quick fix for another.</p>
+                    </li>
+                    <li>
+                        <h3><i class="fas fa-rocket icon-feature"></i> Accelerated Development</h3>
+                        <p>Distribute tasks, conquer challenges faster, and bring your vision to life at an unprecedented pace.</p>
+                    </li>
+                    <li>
+                        <h3><i class="fas fa-trophy icon-feature"></i> Richer Outcomes</h3>
+                        <p>Combine unique ideas, refine concepts through constructive feedback, and build projects that are more robust, comprehensive, and impactful than you could achieve solo.</p>
+                    </li>
+                    <li>
+                        <h3><i class="fas fa-comments icon-feature"></i> Community & Connection</h3>
+                        <p>Forge valuable relationships with fellow creators, learn from each other, and celebrate successes together.</p>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="section-block">
+            <div class="container">
+                <h2><i class="fas fa-cogs icon-left"></i> How It Works: Simple, Seamless, Powerful.</h2>
+                <ol class="steps-list">
+                    <li>
+                        <h3>1. <i class="fas fa-search icon-step"></i> Find Your Project</h3>
+                        <p>Browse a vast library of open projects, or search for something specific that sparks your interest.</p>
+                    </li>
+                    <li>
+                        <h3>2. <i class="fas fa-copy icon-step"></i> Click 'Fork'</h3>
+                        <p>With a single click, create your personal, editable copy of the project. This copy is yours to modify without affecting the original.</p>
+                    </li>
+                    <li>
+                        <h3>3. <i class="fas fa-lightbulb icon-step"></i> Innovate & Build</h3>
+                        <p>Work on your forked project, making changes, adding features, or refining existing elements.</p>
+                    </li>
+                    <li>
+                        <h3>4. <i class="fas fa-user-plus icon-step"></i> Invite Collaboration</h3>
+                        <p>Share your forked project and invite others to contribute, or merge your changes back into the original project (if the owner accepts your contribution).</p>
+                    </li>
+                    <li>
+                        <h3>5. <i class="fas fa-code-merge icon-step"></i> Merge & Grow</h3>
+                        <p>Contribute your improvements back to the original project, or keep your fork independent. The choice is yours, and the possibilities are endless.</p>
+                    </li>
+                </ol>
+            </div>
+        </section>
+    </main>
+
+    <footer class="cta-section">
+        <div class="container">
+            <p>Join a community where every project is a stepping stone to something bigger. <strong>Fork & Collaborate</strong> and unlock the true potential of collective creativity.</p>
+            <p>Ready to build something amazing together?</p>
+
+            {% for project in project_ideas %}
+            <a href="{{ url_for('view_project_details', project_id=project.id) }}" class="btn btn-outline-warning btn-sm">View Forked Work</a>
+            {# You might have other project details here, e.g., project.name, project.description, etc. #}
+        {% endfor %}                </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Project Idea</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .container {
+            margin-top: 30px;
+        }
+        .form-group label {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2 class="mb-4">Edit Project Idea: {{ idea.title }}</h2>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="title">Title</label>
+                <input type="text" class="form-control" id="title" name="title" value="{{ idea.title }}" required>
+            </div>
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea class="form-control" id="description" name="description" rows="5" required>{{ idea.description }}</textarea>
+            </div>
+            <div class="form-group">
+                <label for="innovations">Innovations</label>
+                <textarea class="form-control" id="innovations" name="innovations" rows="3">{{ idea.innovations }}</textarea>
+            </div>
+            <div class="form-group">
+                <label for="contact_email">Contact Email</label>
+                <input type="email" class="form-control" id="contact_email" name="contact_email" value="{{ idea.contact_email }}" required>
+            </div>
+            <div class="form-group">
+                <label for="visibility">Visibility</label>
+                <select class="form-control" id="visibility" name="visibility" required>
+                    <option value="public" {% if idea.visibility == 'public' %}selected{% endif %}>Public</option>
+                    <option value="private" {% if idea.visibility == 'private' %}selected{% endif %}>Private</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="project_files">Upload New Files (Optional)</label>
+                <input type="file" class="form-control-file" id="project_files" name="project_files" multiple>
+                {% if idea.file_paths %}
+                    <small class="form-text text-muted mt-2">Current Files:</small>
+                    {% set files = idea.file_paths.split(',') %}
+                    {% for file in files %}
+                        <a href="{{ url_for('static', filename='project_uploads/' + file.split('/')[-1]) }}" target="_blank" class="d-block">{{ file.split('/')[-1] }}</a>
+                    {% endfor %}
+                    <small class="form-text text-warning">Uploading new files will be added to existing ones. Deletion of individual files is not implemented here.</small>
+                {% endif %}
+            </div>
+            <button type="submit" class="btn btn-success">Update Project Idea</button>
+            <a href="{{ url_for('admin_project_ideas') }}" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

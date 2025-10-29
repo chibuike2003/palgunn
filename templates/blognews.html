@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Beautiful Blog</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f8f8;
+            color: #333;
+        }
+        .container {
+            max-width: 960px;
+        }
+        .blog-post-card, .comment-card, .comment-form {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+        .reply-form {
+            border-left: 3px solid #cbd5e1; /* slate-300 */
+        }
+        button {
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+        }
+        button:hover {
+            transform: translateY(-1px);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-4 sm:p-8">
+    <div class="container mx-auto p-4 sm:p-6 bg-white rounded-xl shadow-lg mt-4 mb-8">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl sm:text-5xl font-extrabold text-gray-800 tracking-tight">My Beautiful Blog</h1>
+            <p class="text-lg text-gray-600 mt-2">Thoughts, insights, and stories.</p>
+        </header>
+
+        <main id="blog-posts-container" class="space-y-12">
+            </main>
+    </div>
+
+    <script>
+        // Data structure to hold blog posts and their comments
+        let blogPosts = [
+            {
+                id: 'post1',
+                title: 'The Future of AI in Everyday Life',
+                author: 'Jane Doe',
+                date: 'May 15, 2025',
+                imageUrl: 'https://placehold.co/800x450/4ade80/ffffff?text=AI+Future', // Added image URL
+                content: `
+                    <p class="mb-4">Artificial Intelligence is rapidly evolving, moving from theoretical concepts to practical applications that touch almost every aspect of our daily lives. From smart home devices anticipating our needs to sophisticated algorithms powering medical diagnostics, AI's presence is becoming ubiquitous.</p>
+                    <p class="mb-4">One of the most exciting areas is personalized learning and education. AI tutors can adapt to individual learning styles, providing tailored content and feedback, making education more accessible and effective. Similarly, in healthcare, AI is assisting in drug discovery, predictive analytics for disease outbreaks, and even robotic surgery, leading to better outcomes and efficiency.</p>
+                    <p>However, the ethical implications and potential societal changes, such as job displacement and privacy concerns, demand careful consideration. It's crucial that as we embrace AI, we also develop robust frameworks to ensure its responsible and equitable use.</p>
+                `,
+                comments: [] // Comments for this post will be stored here
+            },
+            {
+                id: 'post2',
+                title: 'Exploring the Wonders of Nature Photography',
+                author: 'John Smith',
+                date: 'April 28, 2025',
+                imageUrl: 'https://placehold.co/800x450/3b82f6/ffffff?text=Nature+Photography', // Added image URL
+                content: `
+                    <p class="mb-4">Nature photography is more than just capturing pretty landscapes; it's about connecting with the environment and telling a story through images. The challenge lies in finding the unique perspective, understanding light, and having patience to wait for that perfect moment.</p>
+                    <p class="mb-4">Whether it's the grandeur of a mountain range, the intricate detail of a dewdrop on a leaf, or the fleeting glimpse of wildlife, each subject offers endless possibilities. Early morning or late afternoon often provide the best light, known as the "golden hour," which adds warmth and drama to your shots.</p>
+                    <p>Remember to respect the environment, leave no trace, and always prioritize the well-being of any wildlife you encounter. A good nature photographer is not just an observer but a protector of the natural world.</p>
+                `,
+                comments: []
+            }
+        ];
+
+        // Add some initial comments for demonstration
+        blogPosts[0].comments = [
+            {
+                id: 'comment1-1',
+                author: 'Alice Wonderland',
+                text: 'This is a fascinating article on AI! I particularly agree with the point about personalized learning. It could revolutionize education.',
+                replies: []
+            },
+            {
+                id: 'comment1-2',
+                author: 'Bob Builder',
+                text: 'Great insights! What are your thoughts on the impact of AI on creative industries?',
+                replies: [
+                    {
+                        id: 'reply1-2-1',
+                        author: 'Jane Doe',
+                        text: 'That\'s a great question, Bob! AI tools can definitely enhance creativity, but I believe human intuition and emotion will always be central to truly groundbreaking artistic endeavors. It\'s more of a partnership than a replacement.',
+                        replies: []
+                    }
+                ]
+            }
+        ];
+
+        blogPosts[1].comments = [
+            {
+                id: 'comment2-1',
+                author: 'Charlie Chaplin',
+                text: 'Beautifully written! Nature photography is truly therapeutic. Any tips for beginners on gear?',
+                replies: []
+            }
+        ];
+
+        /**
+         * Renders all blog posts and their comments to the DOM.
+         */
+        function renderBlogPosts() {
+            const container = document.getElementById('blog-posts-container');
+            container.innerHTML = ''; // Clear existing content
+
+            blogPosts.forEach(post => {
+                const postElement = document.createElement('article');
+                postElement.id = `post-${post.id}`;
+                postElement.className = 'blog-post-card p-6 sm:p-8 mb-8';
+                postElement.innerHTML = `
+                    ${post.imageUrl ? `<img src="${post.imageUrl}" alt="${post.title}" class="w-full h-auto rounded-lg mb-6 object-cover max-h-96">` : ''}
+                    <h2 class="text-3xl sm:text-4xl font-bold text-gray-800 mb-2">${post.title}</h2>
+                    <p class="text-sm text-gray-500 mb-4">By <span class="font-semibold">${post.author}</span> on ${post.date}</p>
+                    <div class="prose max-w-none text-gray-700 leading-relaxed mb-6">${post.content}</div>
+
+                    <div class="comments-section mt-8 border-t border-gray-200 pt-6">
+                        <h3 class="text-2xl font-semibold text-gray-700 mb-6">Comments</h3>
+                        <div id="comments-list-${post.id}" class="space-y-6">
+                            </div>
+
+                        <div class="comment-form p-6 mt-8 rounded-lg shadow-inner bg-gray-50">
+                            <h4 class="text-xl font-semibold text-gray-700 mb-4">Leave a Comment</h4>
+                            <textarea id="comment-text-${post.id}" class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 focus:border-transparent resize-y min-h-[80px]" placeholder="Write your comment here..."></textarea>
+                            <input type="text" id="comment-author-${post.id}" class="w-full mt-3 p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 focus:border-transparent" placeholder="Your Name (Optional)">
+                            <button onclick="addComment('${post.id}')" class="mt-4 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 shadow">
+                                Post Comment
+                            </button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(postElement);
+                renderComments(post.id); // Render comments for the newly added post
+            });
+        }
+
+        /**
+         * Renders comments for a specific blog post.
+         * @param {string} postId - The ID of the blog post.
+         * @param {Array} comments - The array of comments to render (defaults to post's comments).
+         * @param {HTMLElement} parentElement - The DOM element to append comments to.
+         * @param {string} depthClass - Class for nesting replies (e.g., 'pl-8').
+         */
+        function renderComments(postId, comments = null, parentElement = null, depthClass = '') {
+            const post = blogPosts.find(p => p.id === postId);
+            if (!post) return;
+
+            const commentsToRender = comments || post.comments;
+            const targetElement = parentElement || document.getElementById(`comments-list-${postId}`);
+            if (!targetElement) return;
+
+            // Clear previous comments if rendering from the root
+            if (!parentElement) {
+                targetElement.innerHTML = '';
+            }
+
+            commentsToRender.forEach(comment => {
+                const commentElement = document.createElement('div');
+                commentElement.className = `comment-card p-4 rounded-lg shadow-sm mb-4 ${depthClass}`;
+                commentElement.innerHTML = `
+                    <div class="flex items-center mb-2">
+                        <span class="font-semibold text-gray-800">${comment.author || 'Anonymous'}</span>
+                        <span class="text-gray-500 text-sm ml-2">- Just now</span> </div>
+                    <p class="text-gray-700 mb-3">${comment.text}</p>
+                    <button onclick="toggleReplyForm('${postId}', '${comment.id}')" class="text-blue-600 hover:text-blue-800 text-sm font-medium focus:outline-none">Reply</button>
+
+                    <div id="reply-form-${comment.id}" class="reply-form hidden mt-4 p-4 rounded-md bg-gray-50 border-l-4 border-blue-400">
+                        <h5 class="text-md font-semibold text-gray-700 mb-2">Reply to ${comment.author || 'Anonymous'}</h5>
+                        <textarea id="reply-text-${comment.id}" class="w-full p-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-400 resize-y min-h-[60px]" placeholder="Write your reply here..."></textarea>
+                        <input type="text" id="reply-author-${comment.id}" class="w-full mt-2 p-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-400" placeholder="Your Name (Optional)">
+                        <button onclick="addReply('${postId}', '${comment.id}')" class="mt-3 px-4 py-2 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 shadow-sm">
+                            Post Reply
+                        </button>
+                    </div>
+                    <div id="replies-list-${comment.id}" class="mt-4 pl-4 sm:pl-6 space-y-4">
+                        </div>
+                `;
+                targetElement.appendChild(commentElement);
+
+                // Recursively render replies
+                if (comment.replies && comment.replies.length > 0) {
+                    const repliesListElement = document.getElementById(`replies-list-${comment.id}`);
+                    renderComments(postId, comment.replies, repliesListElement, 'pl-4 sm:pl-6'); // Add more padding for deeper nesting
+                }
+            });
+        }
+
+        /**
+         * Adds a new comment to a blog post.
+         * @param {string} postId - The ID of the blog post.
+         */
+        function addComment(postId) {
+            const commentTextArea = document.getElementById(`comment-text-${postId}`);
+            const commentAuthorInput = document.getElementById(`comment-author-${postId}`);
+            const commentText = commentTextArea.value.trim();
+            const commentAuthor = commentAuthorInput.value.trim();
+
+            if (!commentText) {
+                // In a real app, you'd show a user-friendly message, not an alert.
+                // For this demo, we'll log to console.
+                console.error("Comment cannot be empty.");
+                return;
+            }
+
+            const post = blogPosts.find(p => p.id === postId);
+            if (post) {
+                const newComment = {
+                    id: `comment-${postId}-${Date.now()}`, // Simple unique ID
+                    author: commentAuthor || 'Anonymous',
+                    text: commentText,
+                    replies: []
+                };
+                post.comments.push(newComment);
+                renderComments(postId); // Re-render comments for the specific post
+                commentTextArea.value = ''; // Clear the text area
+                commentAuthorInput.value = ''; // Clear the author input
+            }
+        }
+
+        /**
+         * Adds a reply to an existing comment.
+         * @param {string} postId - The ID of the blog post.
+         * @param {string} parentCommentId - The ID of the comment being replied to.
+         */
+        function addReply(postId, parentCommentId) {
+            const replyTextArea = document.getElementById(`reply-text-${parentCommentId}`);
+            const replyAuthorInput = document.getElementById(`reply-author-${parentCommentId}`);
+            const replyText = replyTextArea.value.trim();
+            const replyAuthor = replyAuthorInput.value.trim();
+
+            if (!replyText) {
+                console.error("Reply cannot be empty.");
+                return;
+            }
+
+            const post = blogPosts.find(p => p.id === postId);
+            if (!post) return;
+
+            // Helper function to find and add reply recursively
+            function findAndAddReply(commentsArray, targetId, newReply) {
+                for (const comment of commentsArray) {
+                    if (comment.id === targetId) {
+                        comment.replies.push(newReply);
+                        return true;
+                    }
+                    if (comment.replies && findAndAddReply(comment.replies, targetId, newReply)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            const newReply = {
+                id: `reply-${parentCommentId}-${Date.now()}`, // Simple unique ID
+                author: replyAuthor || 'Anonymous',
+                text: replyText,
+                replies: []
+            };
+
+            if (findAndAddReply(post.comments, parentCommentId, newReply)) {
+                renderComments(postId); // Re-render comments for the entire post to update replies
+                replyTextArea.value = ''; // Clear the text area
+                replyAuthorInput.value = ''; // Clear the author input
+                toggleReplyForm(postId, parentCommentId); // Hide the reply form after submission
+            }
+        }
+
+        /**
+         * Toggles the visibility of a reply form.
+         * @param {string} postId - The ID of the blog post (not strictly needed here but good practice).
+         * @param {string} commentId - The ID of the comment whose reply form to toggle.
+         */
+        function toggleReplyForm(postId, commentId) {
+            const replyForm = document.getElementById(`reply-form-${commentId}`);
+            if (replyForm) {
+                replyForm.classList.toggle('hidden');
+                // Auto-focus on the textarea when shown
+                if (!replyForm.classList.contains('hidden')) {
+                    document.getElementById(`reply-text-${commentId}`).focus();
+                }
+            }
+        }
+
+        // Initialize the blog page when the DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', renderBlogPosts);
+    </script>
+</body>
+</html>

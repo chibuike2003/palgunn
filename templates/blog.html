@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create New Blog Post</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f8f8;
+            color: #333;
+        }
+        .container {
+            max-width: 800px; /* Slightly narrower for the form */
+        }
+        .form-card {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            padding: 2.5rem; /* Increased padding */
+        }
+        input[type="text"], textarea, input[type="file"] {
+            border: 1px solid #d1d5db; /* gray-300 */
+            border-radius: 0.375rem; /* rounded-md */
+            padding: 0.75rem 1rem;
+            transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        input[type="text"]:focus, textarea:focus, input[type="file"]:focus {
+            outline: none;
+            border-color: #3b82f6; /* blue-500 */
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); /* ring-blue-400 */
+        }
+        button {
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+        }
+        button:hover {
+            transform: translateY(-1px);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        .media-preview {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin-top: 1rem;
+            object-fit: cover;
+        }
+        .media-placeholder {
+            background-color: #e2e8f0; /* slate-200 */
+            color: #64748b; /* slate-600 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 150px;
+            border-radius: 8px;
+            margin-top: 1rem;
+            font-size: 1.125rem;
+            text-align: center;
+            padding: 1rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-4 sm:p-8">
+    <div class="container mx-auto p-4 sm:p-6 mt-4 mb-8">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl sm:text-5xl font-extrabold text-gray-800 tracking-tight">Create a New Blog Post</h1>
+            <p class="text-lg text-gray-600 mt-2">Share your thoughts with the world!</p>
+            <!-- Button to view all blogs -->
+            <a href="{{ url_for('get_all_blogs') }}" class="mt-4 inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-full shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                View All Blogs
+            </a>
+        </header>
+
+        <main class="form-card">
+            <!-- Form action and method updated to send data to Flask backend -->
+            <form id="create-post-form" class="space-y-6" action="/create_blog_post" method="POST" enctype="multipart/form-data">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="mb-4">
+                            {% for category, message in messages %}
+                                <div class="text-sm px-4 py-2 rounded text-white {{ 'bg-red-500' if category == 'danger' else 'bg-green-500' }}">
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+                
+                <div>
+                    <label for="post-title" class="block text-lg font-medium text-gray-700 mb-2">Blog Post Title</label>
+                    <input type="text" id="post-title" name="title" class="w-full" placeholder="e.g., The Art of Minimalist Living" required>
+                </div>
+
+                <div>
+                    <label for="post-author" class="block text-lg font-medium text-gray-700 mb-2">Your Name</label>
+                    <!-- Input field now pre-filled with fullname from Flask and made readonly -->
+                    <input type="text" id="post-author" name="author_name" class="w-full" value="{{ fullname }}" readonly required>
+                </div>
+                <div>
+                    <label for="post-media" class="block text-lg font-medium text-gray-700 mb-2">Upload Picture or Video (Optional)</label>
+                    <input type="file" id="post-media" name="media_file" class="w-full text-gray-700 bg-white" accept="image/*,video/*">
+                    <p class="text-sm text-gray-500 mt-1">Select an image (JPG, PNG, GIF) or video (MP4, WebM) file.</p>
+                    <div id="media-preview-container" class="mt-4">
+                        <!-- Media preview will be displayed here -->
+                    </div>
+                </div>
+
+                <div>
+                    <label for="post-content" class="block text-lg font-medium text-gray-700 mb-2">Blog Content</label>
+                    <textarea id="post-content" name="content" class="w-full min-h-[200px] resize-y" placeholder="Write your amazing blog post content here..." required></textarea>
+                </div>
+
+                <button type="submit" class="w-full px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 shadow-lg">
+                    Publish Blog Post
+                </button>
+            </form>
+
+            <div id="confirmation-message" class="hidden mt-6 p-4 bg-green-100 text-green-800 rounded-lg border border-green-200 text-center font-medium">
+                <!-- Messages from Flask will be displayed here -->
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // This JavaScript now only handles the media preview.
+        // The form submission is handled by the browser sending a POST request to Flask.
+
+        /**
+         * Handles the selection of a file for upload, displaying a preview.
+         * @param {Event} event - The change event from the file input.
+         */
+        document.getElementById('post-media').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            const previewContainer = document.getElementById('media-preview-container');
+            previewContainer.innerHTML = ''; // Clear previous preview
+
+            if (file) {
+                const fileType = file.type.split('/')[0]; // 'image' or 'video'
+
+                if (fileType === 'image') {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.alt = 'Media Preview';
+                        img.className = 'media-preview';
+                        img.onerror = () => {
+                            img.outerHTML = '<div class="media-placeholder">Failed to load image preview.</div>';
+                        };
+                        previewContainer.appendChild(img);
+                    };
+                    reader.readAsDataURL(file); // Convert image to base64
+                } else if (fileType === 'video') {
+                    const videoUrl = URL.createObjectURL(file); // Create a temporary URL for video
+                    const video = document.createElement('video');
+                    video.src = videoUrl;
+                    video.controls = true; // Add video controls
+                    video.className = 'media-preview';
+                    video.onerror = () => {
+                        video.outerHTML = '<div class="media-placeholder">Failed to load video preview.</div>';
+                    };
+                    previewContainer.appendChild(video);
+                } else {
+                    previewContainer.innerHTML = '<div class="media-placeholder">Unsupported file type. Please select an image or video.</div>';
+                }
+            }
+        });
+
+        // This client-side script for showing confirmation is now mostly for illustrative
+        // purposes, as the Flask backend will handle the actual response and redirection.
+        // You would typically remove this if Flask redirects after successful submission.
+        const urlParams = new URLSearchParams(window.location.search);
+        const status = urlParams.get('status');
+        const message = urlParams.get('message');
+        const confirmationMessageDiv = document.getElementById('confirmation-message');
+
+        if (status && message) {
+            confirmationMessageDiv.classList.remove('hidden');
+            confirmationMessageDiv.innerHTML = decodeURIComponent(message);
+            if (status === 'success') {
+                confirmationMessageDiv.classList.remove('bg-red-100', 'text-red-800');
+                confirmationMessageDiv.classList.add('bg-green-100', 'text-green-800');
+            } else if (status === 'error') {
+                confirmationMessageDiv.classList.remove('bg-green-100', 'text-green-800');
+                confirmationMessageDiv.classList.add('bg-red-100', 'text-red-800');
+            }
+            setTimeout(() => {
+                confirmationMessageDiv.classList.add('hidden');
+                // Clear URL parameters after message is shown to avoid re-showing on refresh
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

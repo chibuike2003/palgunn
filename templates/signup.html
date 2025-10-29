@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sign Up</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        
+        .bg-gray-100 {
+            background-color: #f7f7f7;
+        }
+        
+        .flex {
+            display: flex;
+        }
+        
+        .items-center {
+            align-items: center;
+        }
+        
+        .justify-center {
+            justify-content: center;
+        }
+        
+        .min-h-screen {
+            min-height: 100vh;
+        }
+        
+        .bg-white {
+            background-color: #fff;
+        }
+        
+        .shadow-2xl {
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        
+        .rounded-xl {
+            border-radius: 0.75rem;
+        }
+        
+        .w-full {
+            width: 100%;
+        }
+        
+        .max-w-xl {
+            max-width: 36rem;
+        }
+        
+        .p-8 {
+            padding: 2rem;
+        }
+        
+        .text-2xl {
+            font-size: 1.5rem;
+        }
+        
+        .font-bold {
+            font-weight: bold;
+        }
+        
+        .mb-6 {
+            margin-bottom: 1.5rem;
+        }
+        
+        .text-center {
+            text-align: center;
+        }
+        
+        .text-gray-800 {
+            color: #2f2f2f;
+        }
+        
+        .mb-4 {
+            margin-bottom: 1rem;
+        }
+        
+        .text-sm {
+            font-size: 0.875rem;
+        }
+        
+        .px-4 {
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+        
+        .py-2 {
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+        }
+        
+        .rounded {
+            border-radius: 0.25rem;
+        }
+        
+        .text-white {
+            color: #fff;
+        }
+        
+        .bg-red-500 {
+            background-color: #ef4444;
+        }
+        
+        .bg-green-500 {
+            background-color: #34c759;
+        }
+        
+        .grid {
+            display: grid;
+        }
+        
+        .grid-cols-1 {
+            grid-template-columns: repeat(1, minmax(0, 1fr));
+        }
+        
+        .gap-4 {
+            gap: 1rem;
+        }
+        
+        .border {
+            border-width: 1px;
+            border-style: solid;
+            border-color: #ddd;
+        }
+        
+        .mt-1 {
+            margin-top: 0.25rem;
+        }
+        
+        .bg-green-600 {
+            background-color: #22c55e;
+        }
+        
+        .hover\:bg-green-700 {
+            transition: background-color 0.2s ease-in-out;
+        }
+        
+        .hover\:bg-green-700:hover {
+            background-color: #1e7e34;
+        }
+        
+        .text-sm {
+            font-size: 0.875rem;
+        }
+        
+        .text-gray-600 {
+            color: #4b5563;
+        }
+        
+        .mt-6 {
+            margin-top: 1.5rem;
+        }
+        
+        .text-center {
+            text-align: center;
+        }
+        
+        .text-blue-600 {
+            color: #2563eb;
+        }
+        
+        .hover\:underline {
+            transition: text-decoration 0.2s ease-in-out;
+        }
+        
+        .hover\:underline:hover {
+            text-decoration: underline;
+        }
+    </style>
+
+
+
+
+
+
+
+  </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+  <div class="bg-white shadow-2xl rounded-xl w-full max-w-xl p-8">
+    <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">Create an Account</h2>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="mb-4">
+          {% for category, message in messages %}
+            <div class="text-sm px-4 py-2 rounded text-white {{ 'bg-red-500' if category == 'danger' else 'bg-green-500' }}">
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <form action="{{ url_for('signup') }}" method="POST" class="grid grid-cols-1 gap-4">
+      <div>
+        <label class="block text-gray-700">Full Name</label>
+        <input type="text" name="signupName" required class="w-full border rounded px-4 py-2 mt-1">
+      </div>
+      <div>
+        <label class="block text-gray-700">Email (Gmail only)</label>
+        <input type="email" name="signupEmail" required class="w-full border rounded px-4 py-2 mt-1">
+      </div>
+      <div>
+        <label class="block text-gray-700">Registration Number</label>
+        <input type="text" name="regno" required class="w-full border rounded px-4 py-2 mt-1">
+      </div>
+      <div>
+        <label class="block text-gray-700">Phone Number</label>
+        <input type="text" name="phone" required class="w-full border rounded px-4 py-2 mt-1">
+      </div>
+      <div>
+        <label class="block text-gray-700">Password</label>
+        <input type="password" name="signupPassword" required class="w-full border rounded px-4 py-2 mt-1">
+      </div>
+      <div>
+        <label class="block text-gray-700">Confirm Password</label>
+        <input type="password" name="confirmpassword" required class="w-full border rounded px-4 py-2 mt-1">
+      </div>
+      <button type="submit" class="w-full bg-green-600 text-white rounded px-4 py-2 hover:bg-green-700 transition duration-300">
+        Sign Up
+      </button>
+    </form>
+
+    <p class="text-sm text-gray-600 mt-6 text-center">Already have an account? 
+      <a href="{{ url_for('login') }}" class="text-blue-600 hover:underline">Login</a>
+    </p>
+  </div>
+</body>
+</html>

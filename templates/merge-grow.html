@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shape the Future - ProjectFlow</title>
+    <link rel="stylesheet" href="../static/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="navbar">
+        <div class="container">
+            <a href="discover_projects.html" class="logo">ProjectFlow</a>
+            <nav>
+                <ul>
+                    <li><a href="discover_projects.html">Discover</a></li>
+                    <li><a href="my_forked_project.html">My Projects</a></li>
+                    <li><a href="#">Community</a></li>
+                    <li><a href="#" class="btn btn-primary">Sign In</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="container merge-section">
+            <h2>Shape the Future</h2>
+            <p style="text-align: center; margin-bottom: 40px; font-size: 1.1rem; color: var(--secondary-color);">Your contributions strengthen the community. Propose your changes back to the original project, or maintain your independent innovation.</p>
+
+            <div class="merge-option">
+                <h3>Contribute Back to Original</h3>
+                <p>Ready to see your improvements integrated? Submit a pull request to the original project.</p>
+
+                <div class="merge-diagram">
+                    <div class="merge-box">Your Forked Project</div>
+                    <i class="fas fa-arrow-right merge-arrow"></i>
+                    <div class="merge-box">Original Project</div>
+                </div>
+
+                <form class="merge-form" style="max-width: 700px; margin: 0 auto;">
+                    <div class="merge-form-group">
+                        <label for="targetProject">Select Original Project:</label>
+                        <select id="targetProject" name="targetProject" required>
+                            <option value="">-- Select a project --</option>
+                            <option value="ai-chatbot">AI Chatbot for Customer Support</option>
+                            <option value="finance-tracker">Personal Finance Tracker</option>
+                            <option value="voting-system">Decentralized Voting System</option>
+                            </select>
+                    </div>
+                    <div class="merge-form-group">
+                        <label for="mergeDescription">Describe Your Changes:</label>
+                        <textarea id="mergeDescription" placeholder="Clearly explain what you've added, fixed, or improved..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-success large-btn" id="submitMergeRequest">
+                        <i class="fas fa-share-square"></i> Submit Pull Request
+                    </button>
+                    <p style="margin-top: 15px; font-size: 0.95rem; color: var(--secondary-color);">The project owner will review your changes and decide whether to merge them.</p>
+                </form>
+            </div>
+
+            <hr style="margin: 60px auto; border-color: var(--border-color); max-width: 50%;">
+
+            <div class="merge-option">
+                <h3>Keep Your Fork Independent</h3>
+                <p>Your fork is always yours to evolve independently. Continue to innovate, build, and share your unique vision.</p>
+                <a href="my_forked_project.html" class="btn btn-primary large-btn">
+                    <i class="fas fa-tools"></i> Go to My Projects
+                </a>
+                <p style="margin-top: 15px; font-size: 0.95rem; color: var(--secondary-color);">You can always propose changes later, or simply use your fork as a standalone project.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 ProjectFlow. All rights reserved.</p>
+        </div>
+    </footer>
+    <script src="https://kit.fontawesome.com/your-font-awesome-kit-id.js" crossorigin="anonymous"></script>
+    <script src="../static/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Faculty Projects Dashboard</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f7f9fc;
+      margin: 0;
+      padding: 2rem;
+    }
+
+    .faculty-dashboard {
+      max-width: 1000px;
+      margin: auto;
+      background-color: #fff;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+      padding: 2rem;
+    }
+
+    .faculty-dashboard h2 {
+      font-size: 2rem;
+      color: #2c3e50;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+    }
+
+    .filters {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .filters select {
+      padding: 0.6rem 1rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1rem;
+    }
+
+    .highlight-section {
+      margin-top: 2rem;
+    }
+
+    .highlight-section h3 {
+      font-size: 1.5rem;
+      color: #34495e;
+      margin-bottom: 1rem;
+    }
+
+    .project-highlight-card {
+      background: linear-gradient(135deg, #dfe9f3, #ffffff);
+      padding: 1.5rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+      transition: transform 0.3s ease;
+    }
+
+    .project-highlight-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .project-highlight-card h4 {
+      margin: 0;
+      font-size: 1.2rem;
+      color: #2c3e50;
+    }
+
+    .project-highlight-card p {
+      margin-top: 0.5rem;
+      color: #555;
+      font-style: italic;
+    }
+
+    @media (max-width: 600px) {
+      .filters {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="faculty-dashboard">
+    <h2>📚 Faculty Projects</h2>
+
+    <div class="filters">
+      <select>
+        <option>Filter by Department</option>
+        <option>Computer Science</option>
+        <option>Engineering</option>
+        <option>Humanities</option>
+      </select>
+      <select>
+        <option>Publication Status</option>
+        <option>Published</option>
+        <option>Under Review</option>
+        <option>Draft</option>
+      </select>
+    </div>
+
+    <div class="highlight-section">
+      <h3>🌟 Top Picks This Month</h3>
+      <div class="project-highlight-card">
+        <h4>Blockchain & Education</h4>
+        <p>Prof. Williams</p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

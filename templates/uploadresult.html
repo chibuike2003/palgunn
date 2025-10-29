@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snap & Upload</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Light gray background */
+        }
+        /* Custom styles for better button effects and shadows */
+        .btn {
+            @apply px-6 py-3 rounded-xl shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-4 focus:ring-opacity-75;
+        }
+        .btn-primary {
+            @apply bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-indigo-300;
+        }
+        .btn-secondary {
+            @apply bg-gray-200 text-gray-800 hover:bg-gray-300 focus:ring-gray-300;
+        }
+        .card {
+            @apply bg-white p-6 rounded-2xl shadow-xl border border-gray-100 flex flex-col items-center;
+        }
+        video {
+            width: 100%;
+            height: auto;
+            max-width: 640px; /* Limit video width */
+            border-radius: 0.75rem; /* rounded-xl */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            max-width: 640px;
+            border-radius: 0.75rem; /* rounded-xl */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: 1px solid #e5e7eb; /* gray-200 */
+        }
+        /* Style for individual snapped images in the preview */
+        .snapped-img-thumbnail {
+            width: 100px; /* Smaller thumbnail size */
+            height: 100px;
+            object-fit: cover;
+            border-radius: 0.5rem; /* rounded-lg */
+            margin: 0.5rem;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 0.75rem; /* rounded-xl */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen p-4 sm:p-6 bg-gray-100">
+
+    <div class="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        <!-- Camera Snap Section -->
+        <div class="card md:col-span-1">
+            <h2 class="text-2xl font-semibold mb-6 text-gray-800">Snap Multiple Photos</h2>
+            <video id="cameraFeed" class="mb-4 bg-gray-800" autoplay playsinline></video>
+            <div class="flex flex-col sm:flex-row gap-4 w-full justify-center">
+                <button id="snapButton" class="btn btn-primary flex-1">Snap Photo</button>
+                <button id="clearSnappedButton" class="btn btn-secondary flex-1">Clear All</button>
+            </div>
+            <canvas id="photoCanvas" class="hidden"></canvas>
+            <div id="snappedPhotosContainer" class="mt-4 hidden w-full">
+                <h3 class="text-lg font-medium text-gray-700 mb-2">Snapped Photos:</h3>
+                <div id="snappedPhotosPreview" class="flex flex-wrap justify-center items-center p-2 border border-gray-200 rounded-lg min-h-[120px] bg-gray-50">
+                    <!-- Snapped photo thumbnails will be appended here -->
+                </div>
+                <p class="text-sm text-gray-500 mt-2 text-center" id="snappedMessage"></p>
+                <button id="uploadAllSnappedButton" class="btn btn-primary w-full mt-4">Upload All Snapped Photos</button>
+            </div>
+            <p id="cameraStatus" class="text-red-500 text-sm mt-4"></p>
+        </div>
+
+        <!-- File Upload Section (Image) -->
+        <div class="card md:col-span-1">
+            <h2 class="text-2xl font-semibold mb-6 text-gray-800">Upload an Image</h2>
+            <input type="file" id="imageUpload" accept="image/*" class="hidden">
+            <label for="imageUpload" class="btn btn-secondary w-full max-w-xs cursor-pointer mb-4">
+                Choose Image File
+            </label>
+            <div id="imagePreview" class="mt-4 hidden w-full">
+                <h3 class="text-lg font-medium text-gray-700 mb-2">Uploaded Image Preview:</h3>
+                <img id="uploadedImage" src="#" alt="Uploaded Image" class="w-full h-auto object-cover">
+                <p class="text-sm text-gray-500 mt-2 text-center" id="uploadedImageMessage"></p>
+            </div>
+            <p id="imageStatus" class="text-red-500 text-sm mt-2"></p>
+        </div>
+
+        <!-- Document Upload Section -->
+        <div class="card md:col-span-2">
+            <h2 class="text-2xl font-semibold mb-6 text-gray-800">Upload a Document</h2>
+            <input type="file" id="documentUpload" accept=".pdf,.doc,.docx,.txt" class="hidden">
+            <label for="documentUpload" class="btn btn-secondary w-full max-w-xs cursor-pointer mb-4">
+                Choose Document File
+            </label>
+            <div id="documentInfo" class="mt-4 hidden w-full text-center">
+                <h3 class="text-lg font-medium text-gray-700 mb-2">Uploaded Document:</h3>
+                <p class="text-gray-600 mb-1">File Name: <span id="documentName" class="font-semibold"></span></p>
+                <p class="text-gray-600">File Size: <span id="documentSize" class="font-semibold"></span> KB</p>
+                <p class="text-green-600 mt-2" id="documentUploadMessage"></p>
+            </div>
+            <p id="documentStatus" class="text-red-500 text-sm mt-2"></p>
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const cameraFeed = document.getElementById('cameraFeed');
+            const snapButton = document.getElementById('snapButton');
+            const clearSnappedButton = document.getElementById('clearSnappedButton');
+            const uploadAllSnappedButton = document.getElementById('uploadAllSnappedButton');
+            const photoCanvas = document.getElementById('photoCanvas');
+            const snappedPhotosContainer = document.getElementById('snappedPhotosContainer');
+            const snappedPhotosPreview = document.getElementById('snappedPhotosPreview'); // Container for thumbnails
+            const snappedMessage = document.getElementById('snappedMessage');
+            const cameraStatus = document.getElementById('cameraStatus');
+
+            const imageUpload = document.getElementById('imageUpload');
+            const imagePreview = document.getElementById('imagePreview');
+            const uploadedImage = document.getElementById('uploadedImage');
+            const uploadedImageMessage = document.getElementById('uploadedImageMessage');
+            const imageStatus = document.getElementById('imageStatus');
+
+            const documentUpload = document.getElementById('documentUpload');
+            const documentInfo = document.getElementById('documentInfo');
+            const documentName = document.getElementById('documentName');
+            const documentSize = document.getElementById('documentSize');
+            const documentUploadMessage = document.getElementById('documentUploadMessage');
+            const documentStatus = document.getElementById('documentStatus');
+
+            let stream; // To hold the camera stream
+            let snappedPhotos = []; // Array to store snapped photo data URLs
+
+            // --- Camera Access and Photo Snapping ---
+            const startCamera = async () => {
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    cameraFeed.srcObject = stream;
+                    cameraStatus.textContent = ''; // Clear any previous error messages
+                } catch (err) {
+                    console.error('Error accessing camera:', err);
+                    cameraStatus.textContent = 'Error: Could not access camera. Please ensure camera access is allowed and no other applications are using it.';
+                    snapButton.disabled = true; // Disable snap button if camera cannot be accessed
+                }
+            };
+
+            snapButton.addEventListener('click', () => {
+                if (!stream) {
+                    cameraStatus.textContent = 'Camera not active. Please allow camera access.';
+                    return;
+                }
+
+                const context = photoCanvas.getContext('2d');
+                // Set canvas dimensions to match video feed
+                photoCanvas.width = cameraFeed.videoWidth;
+                photoCanvas.height = cameraFeed.videoHeight;
+                context.drawImage(cameraFeed, 0, 0, photoCanvas.width, photoCanvas.height);
+
+                // Convert canvas content to a data URL (PNG format)
+                const imageDataUrl = photoCanvas.toDataURL('image/png');
+                snappedPhotos.push(imageDataUrl); // Add to the array
+
+                // Create a thumbnail for preview
+                const imgElement = document.createElement('img');
+                imgElement.src = imageDataUrl;
+                imgElement.alt = `Snapped Photo ${snappedPhotos.length}`;
+                imgElement.classList.add('snapped-img-thumbnail');
+                snappedPhotosPreview.appendChild(imgElement);
+
+                snappedPhotosContainer.classList.remove('hidden');
+                snappedMessage.textContent = `Snapped ${snappedPhotos.length} photo(s).`;
+
+                console.log(`Snapped photo #${snappedPhotos.length}:`, imageDataUrl.substring(0, 50) + '...'); // Log a snippet
+            });
+
+            clearSnappedButton.addEventListener('click', () => {
+                snappedPhotos = []; // Clear the array
+                snappedPhotosPreview.innerHTML = ''; // Clear the preview thumbnails
+                snappedPhotosContainer.classList.add('hidden');
+                snappedMessage.textContent = '';
+                console.log('Cleared all snapped photos.');
+            });
+
+            uploadAllSnappedButton.addEventListener('click', () => {
+                if (snappedPhotos.length === 0) {
+                    snappedMessage.textContent = 'No photos to upload.';
+                    return;
+                }
+                // Simulate upload: In a real application, you would send snappedPhotos array to a server
+                console.log('Attempting to upload all snapped photos:', snappedPhotos);
+                snappedMessage.textContent = `Successfully "uploaded" ${snappedPhotos.length} photos! (Check console for data)`;
+                // After successful upload, you might want to clear the photos
+                // clearSnappedButton.click();
+            });
+
+            // Start camera when the page loads
+            startCamera();
+
+            // --- Image File Upload ---
+            imageUpload.addEventListener('change', (event) => {
+                const file = event.target.files[0];
+                if (file) {
+                    if (file.type.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            uploadedImage.src = e.target.result;
+                            imagePreview.classList.remove('hidden');
+                            uploadedImageMessage.textContent = `Image "${file.name}" uploaded successfully!`;
+                            imageStatus.textContent = ''; // Clear any previous error
+                            console.log('Uploaded image file:', file);
+                        };
+                        reader.readAsDataURL(file);
+                    } else {
+                        imageStatus.textContent = 'Please select a valid image file (e.g., PNG, JPG, GIF).';
+                        imagePreview.classList.add('hidden');
+                    }
+                }
+            });
+
+            // --- Document File Upload ---
+            documentUpload.addEventListener('change', (event) => {
+                const file = event.target.files[0];
+                if (file) {
+                    // Basic file type check
+                    const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain'];
+                    if (allowedTypes.includes(file.type) || file.name.endsWith('.pdf') || file.name.endsWith('.doc') || file.name.endsWith('.docx') || file.name.endsWith('.txt')) {
+                        documentName.textContent = file.name;
+                        documentSize.textContent = (file.size / 1024).toFixed(2); // Size in KB
+                        documentInfo.classList.remove('hidden');
+                        documentUploadMessage.textContent = `Document "${file.name}" uploaded successfully!`;
+                        documentStatus.textContent = ''; // Clear any previous error
+                        console.log('Uploaded document file:', file);
+                        // In a real application, you would handle the file upload to a server here.
+                    } else {
+                        documentStatus.textContent = 'Please select a PDF, Word document (.doc, .docx), or plain text file.';
+                        documentInfo.classList.add('hidden');
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

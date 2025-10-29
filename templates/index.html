@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Dept. of Public Admin & Local Govt - UNN</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="shortcut icon" type="image/png" href="../static/uploads/logos.jpg" sizes="16x16">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <style>
+        :root {
+            --unn-blue: #003366;
+            --unn-gold: #FFD700;
+            --unn-green: #28a745;
+            --unn-dark-blue: #001f3f;
+            --unn-light-gray: #f8f9fa;
+            --unn-text-color: #333;
+        }
+
+        body {
+            font-family: 'Open Sans', sans-serif;
+            color: var(--unn-text-color);
+            line-height: 1.6;
+            overflow: hidden; /* Hide scrollbar while preloader is active */
+        }
+        
+        /* Preloader Styles */
+        #preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--unn-blue);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.5s ease-out;
+        }
+        
+        #preloader.fade-out {
+            opacity: 0;
+            visibility: hidden;
+        }
+        
+        .spinner {
+            width: 80px;
+            height: 80px;
+            border: 8px solid var(--unn-light-gray);
+            border-top: 8px solid var(--unn-gold);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        .loading-text {
+            color: white;
+            margin-top: 20px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.5rem;
+            animation: pulse 2s infinite ease-in-out;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* End of Preloader Styles */
+
+        /* All other existing CSS rules from your original file go here... */
+        
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Montserrat', sans-serif;
+            color: var(--unn-blue);
+            margin-bottom: 1rem;
+        }
+
+        .section-title {
+            font-weight: 700;
+            font-size: 2.5rem;
+            margin-bottom: 2.5rem;
+            position: relative;
+            padding-bottom: 0.5rem;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            bottom: 0;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background-color: var(--unn-gold);
+            border-radius: 2px;
+        }
+
+        .bg-unn {
+            background-color: var(--unn-blue);
+            color: white;
+        }
+
+        .navbar {
+            background-color: var(--unn-dark-blue) !important;
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .navbar-brand {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            font-size: 1.8rem;
+            color: white !important;
+        }
+
+        .btn-unn-primary {
+            background-color: var(--unn-green);
+            border-color: var(--unn-green);
+            color: white;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .btn-unn-primary:hover {
+            background-color: #218838;
+            border-color: #218838;
+            transform: translateY(-2px);
+        }
+
+        .btn-unn-secondary {
+            background-color: var(--unn-gold);
+            border-color: var(--unn-gold);
+            color: var(--unn-dark-blue);
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .btn-unn-secondary:hover {
+            background-color: #e6c200;
+            border-color: #e6c200;
+            transform: translateY(-2px);
+        }
+
+        .bg-sofe-blue {
+            background-color: var(--unn-blue);
+            border: 1px solid var(--unn-blue);
+        }
+
+        .bg-sofe-blue:hover {
+            background-color: #002244;
+            border-color: #002244;
+        }
+
+        .bg-sofe-orange {
+            background-color: var(--unn-gold);
+            border: 1px solid var(--unn-gold);
+            color: var(--unn-dark-blue);
+        }
+
+        .bg-sofe-orange:hover {
+            background-color: #e6c200;
+            border-color: #e6c200;
+            color: var(--unn-dark-blue);
+        }
+
+        .program-card {
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            border-radius: 0.75rem;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            transition: all 0.4s ease-in-out;
+            padding: 2.5rem;
+            text-align: center;
+            background-color: white;
+        }
+
+        .program-card h5 {
+            font-weight: 600;
+            color: var(--unn-blue);
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .program-card p {
+            font-size: 0.95rem;
+            color: #555;
+        }
+
+        .program-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 12px 25px rgba(0,0,0,0.15);
+            border-color: var(--unn-green);
+        }
+
+        footer {
+            background: var(--unn-dark-blue);
+            color: white;
+            padding: 2rem 0;
+            font-size: 0.9rem;
+        }
+
+        .highlight {
+            color: var(--unn-green);
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+
+        /* Carousel Enhancements */
+        .carousel-item {
+            height: 80vh;
+            min-height: 500px;
+            background-size: cover !important;
+            background-position: center center !important;
+            position: relative;
+        }
+
+        .carousel-caption {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 2rem 1.5rem;
+            border-radius: 0.5rem;
+            max-width: 80%;
+            margin: auto;
+        }
+
+        .carousel-caption h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+        }
+
+        .carousel-caption p {
+            font-size: 1.5rem;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.7);
+        }
+
+        .carousel-control-prev-icon,
+        .carousel-control-next-icon {
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
+            padding: 1.5rem;
+        }
+
+        /* General Spacing and Padding */
+        section {
+            padding: 6rem 0;
+        }
+
+        .container {
+            max-width: 1200px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .carousel-caption h1 {
+                font-size: 2.5rem;
+            }
+            .carousel-caption p {
+                font-size: 1.2rem;
+            }
+            .section-title {
+                font-size: 2rem;
+            }
+            .program-card {
+                padding: 1.5rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .carousel-item {
+                height: 60vh;
+            }
+            .carousel-caption h1 {
+                font-size: 2rem;
+            }
+            .carousel-caption p {
+                font-size: 1rem;
+            }
+            .navbar-brand {
+                font-size: 1.5rem;
+            }
+            .section-title {
+                font-size: 1.8rem;
+                margin-bottom: 2rem;
+            }
+            .section-title::after {
+                width: 60px;
+                height: 3px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="preloader">
+        <div class="spinner"></div>
+        <div class="loading-text">Loading...</div>
+    </div>
+    <div id="content" style="opacity: 0;">
+        <nav class="navbar navbar-expand-lg navbar-dark px-4 sticky-top">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#">UNN PALG</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    </ul>
+                    <div class="d-flex align-items-center">
+                        {% if session.get('user_id') %}
+                        <span class="d-inline-block text-lg px-4 py-2 rounded-pill text-white bg-secondary mt-2 mt-lg-0 me-3 shadow-sm">Welcome, {{ session.get('name', '').split(' ')[0] }}</span>
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-unn-primary px-4 py-2 rounded-pill mt-2 mt-lg-0 me-2 shadow">Dashboard</a>
+                        <a href="{{ url_for('logout') }}" class="btn btn-unn-secondary px-4 py-2 rounded-pill mt-2 mt-lg-0 shadow">Logout</a>
+                        {% else %}
+                        <a href="{{ url_for('signup') }}" class="btn btn-unn-secondary px-4 py-2 rounded-pill mt-2 mt-lg-0 shadow">Login/Sign up</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </nav>
+        
+        <div id="heroCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel">
+            <div class="carousel-indicators">
+                <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+                <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
+                <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
+            </div>
+            <div class="carousel-inner">
+                <div class="carousel-item active" style="background-image: url('../static/palg2.jpg');">
+                    <div class="carousel-caption d-flex flex-column justify-content-center align-items-center h-100">
+                        <img src="../static/logo.jpg" alt="UNN Logo" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover;" class="mb-4 border border-5 border-white shadow-lg">
+                        <h1 class="text-white animate__animated animate__fadeInDown">Department of Public Administration & Local Government</h1>
+                        <p class="lead text-light animate__animated animate__fadeInUp">University of Nigeria, Nsukka</p>
+                        <a href="#about" class="btn btn-unn-primary btn-lg mt-4 px-5 py-3 animate__animated animate__zoomIn">Learn More <i class="bi bi-arrow-right"></i></a>
+                    </div>
+                </div>
+                <div class="carousel-item" style="background-image: url('../static/palg1.jpg');">
+                    <div class="carousel-caption d-flex flex-column justify-content-center align-items-center h-100">
+                        <h1 class="text-white animate__animated animate__fadeInDown">Building Future Leaders</h1>
+                        <p class="lead text-light animate__animated animate__fadeInUp">Empowering minds through academic excellence and practical governance.</p>
+                        <a href="#programs" class="btn btn-unn-secondary btn-lg mt-4 px-5 py-3 animate__animated animate__zoomIn">Discover Our Programs <i class="bi bi-book"></i></a>
+                    </div>
+                </div>
+                <div class="carousel-item" style="background-image: url('../static/palg3.jpg');">
+                    <div class="carousel-caption d-flex flex-column justify-content-center align-items-center h-100">
+                        <h1 class="text-white animate__animated animate__fadeInDown">Join Our Vibrant Academic Community</h1>
+                        <p class="lead text-light animate__animated animate__fadeInUp">Explore innovative learning in public administration and local governance.</p>
+                        <a href="{{ url_for('signup') }}" class="btn btn-unn-primary btn-lg mt-4 px-5 py-3 animate__animated animate__zoomIn">Get Started Today <i class="bi bi-person-plus"></i></a>
+                    </div>
+                </div>
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+            </button>
+        </div>
+
+        ---
+
+        <section id="about" class="py-5 bg-white">
+            <div class="container text-center">
+                <h2 class="section-title">About the Department</h2>
+                <p class="lead mb-5 px-md-5">The Department of Public Administration and Local Government at the University of Nigeria, Nsukka, is a beacon of excellence, committed to shaping the next generation of public sector leaders and innovators.</p>
+                <div class="row text-start justify-content-center">
+                    <div class="col-md-5 mb-4">
+                        <div class="card h-100 p-4 shadow-sm border-0">
+                            <h5 class="highlight mb-3"><i class="bi bi-eye-fill me-2"></i>Our Vision</h5>
+                            <p>To be a leading center of excellence in public administration and local government studies, recognized globally for its innovative research, impactful community engagement, and the production of highly competent and ethical professionals.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-5 mb-4">
+                        <div class="card h-100 p-4 shadow-sm border-0">
+                            <h5 class="highlight mb-3"><i class="bi bi-briefcase-fill me-2"></i>Our Mission</h5>
+                            <p>To equip students with profound theoretical knowledge and practical skills in public administration, local government, and policy formulation, fostering critical thinking, research capabilities, and a commitment to public service and sustainable development.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        ---
+
+        <section id="programs" class="bg-light py-5">
+            <div class="container">
+                <h2 class="section-title text-center">Our Academic Programmes</h2>
+                <p class="text-center lead mb-5">We offer a range of distinguished programs designed to cater to diverse academic and career aspirations in public service.</p>
+                <div class="row g-5 mt-4 justify-content-center">
+                    <div class="col-lg-4 col-md-6">
+                        <div class="card program-card">
+                            <i class="bi bi-mortarboard-fill text-unn-blue mb-3" style="font-size: 3rem;"></i>
+                            <h5>B.Sc. Public Administration</h5>
+                            <p>Our undergraduate program provides a robust foundation in governance, public policy, human resource management, and local government administration, preparing students for entry-level public sector roles.</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6">
+                        <div class="card program-card">
+                            <i class="bi bi-journal-check text-unn-blue mb-3" style="font-size: 3rem;"></i>
+                            <h5>M.Sc. Public Administration</h5>
+                            <p>An advanced degree program focusing on specialized areas of public management, policy analysis, and leadership development, designed for professionals seeking to enhance their expertise and career progression.</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6">
+                        <div class="card program-card">
+                            <i class="bi bi-lightbulb-fill text-unn-blue mb-3" style="font-size: 3rem;"></i>
+                            <h5>Ph.D. Public Administration</h5>
+                            <p>Our doctoral program is tailored for aspiring researchers, academics, and high-level policy experts, fostering advanced research skills and contributing new knowledge to the field of public administration.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        ---
+
+        <section id="contact" class="bg-unn py-5 text-center">
+            <div class="container">
+                <h2 class="section-title text-white">Connect With Us</h2>
+                <p class="lead text-white-75 mb-4">We are always happy to hear from prospective students, researchers, and partners. Reach out to us through the channels below.</p>
+                <div class="row justify-content-center text-white">
+                    <div class="col-md-4 mb-3">
+                        <p><i class="bi bi-geo-alt-fill me-2"></i> Faculty of Social Sciences, University of Nigeria, Nsukka</p>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <p>
+                            <i class="bi bi-envelope-fill me-2"></i> Email:
+                            <a href="mailto:palg@unn.edu.ng" class="text-decoration-none text-light hover-underline">palg@unn.edu.ng</a>
+                        </p>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <p><i class="bi bi-telephone-fill me-2"></i> Phone: +234 803 123 4567</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        ---
+
+        <footer class="text-center py-4">
+            <div class="container">
+                <p class="mb-0">&copy; 2025 Department of Public Administration & Local Government, UNN. All Rights Reserved.</p>
+                <div class="mt-2">
+                    <a href="#" class="text-white mx-2 text-decoration-none"><i class="bi bi-facebook"></i></a>
+                    <a href="#" class="text-white mx-2 text-decoration-none"><i class="bi bi-twitter"></i></a>
+                    <a href="#" class="text-white mx-2 text-decoration-none"><i class="bi bi-linkedin"></i></a>
+                </div>
+            </div>
+        </footer>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const preloader = document.getElementById('preloader');
+            const content = document.getElementById('content');
+            
+            window.addEventListener('load', function() {
+                // Remove the fade-out class from the body
+                document.body.style.overflow = 'auto'; // Re-enable scrolling
+                
+                // Add the fade-out class to the preloader to start the transition
+                preloader.classList.add('fade-out');
+                
+                // After the transition ends, hide the preloader
+                preloader.addEventListener('transitionend', function() {
+                    preloader.style.display = 'none';
+                    content.style.opacity = '1';
+                    content.style.transition = 'opacity 0.5s ease-in';
+                });
+            });
+        });
+    </script>
+</body>
+</html>

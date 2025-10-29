@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Help Requests</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            @apply bg-gray-50 text-gray-800; /* Apply default background and text color */
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-blue-600 to-indigo-700 shadow-lg p-4 md:p-6 text-white text-center">
+        <h1 class="text-3xl md:text-4xl font-bold rounded-lg p-2">Admin Help Request Dashboard</h1>
+        <p class="mt-2 text-lg opacity-90">View and manage all user help requests</p>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow container mx-auto p-4 md:p-8">
+        <div class="bg-white shadow-xl rounded-xl p-6 md:p-8">
+            <h2 class="text-2xl md:text-3xl font-semibold text-gray-900 mb-6 border-b pb-4">All Help Requests</h2>
+
+            <!-- Help Requests Table -->
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white border-collapse rounded-lg overflow-hidden">
+                    <thead class="bg-gray-100 border-b border-gray-200">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider rounded-tl-lg">ID</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">User</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Subject</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Message</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider rounded-tr-lg">Status</th>
+                            <!-- Add more headers if 'Help' model has more attributes -->
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        <!-- Loop through help requests here using Jinja2 -->
+                        {% if help %}
+                            {% for request in help %}
+                                <tr class="hover:bg-gray-50 transition-colors duration-200">
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ request.id }}</td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-700">{{ request.user }}</td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-700">{{ request.subject }}</td>
+                                    <td class="px-4 py-4 text-sm text-gray-700 max-w-xs overflow-hidden text-ellipsis">{{ request.message }}</td>
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        {% if request.status == 'Pending' %}
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                                {{ request.status }}
+                                            </span>
+                                        {% elif request.status == 'Resolved' %}
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                                {{ request.status }}
+                                            </span>
+                                        {% else %}
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                                                {{ request.status }}
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <!-- Add more cells if 'Help' model has more attributes -->
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="5" class="px-4 py-8 text-center text-gray-500 text-lg">No help requests found.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+            <!-- End Help Requests Table -->
+
+            <!-- Optional: Add buttons for actions like filtering or resolving requests -->
+            <div class="mt-8 flex justify-center">
+                <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 mr-4">
+                    Refresh Requests
+                </button>
+                <button class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
+                    View Archived
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white text-center p-4 md:p-6 mt-8">
+        <p>&copy; 2025 Admin Dashboard. All rights reserved.</p>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Student Results</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9jA6JcK4Pz/r6fN2n+g3qF+5XzY0z4/u21b6a+bB/pB7w/e4X/vA5u+5zQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        body {
+            background-color: #f0f2f5; /* A light, clean background color */
+        }
+        .header-bar {
+            background-color: #007bff; /* Primary blue for the header */
+            color: white;
+            padding: 1.5rem 0;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+        .table-container {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+        .grade-badge {
+            font-weight: bold;
+            padding: .4em .8em;
+            border-radius: 1rem;
+            color: white;
+            display: inline-block;
+        }
+        .grade-A { background-color: #28a745; }
+        .grade-B { background-color: #17a2b8; }
+        .grade-C { background-color: #ffc107; }
+        .grade-D { background-color: #fd7e14; }
+        .grade-F { background-color: #dc3545; }
+    </style>
+</head>
+<body>
+
+<div class="header-bar">
+    <div class="container d-flex justify-content-between align-items-center">
+        <h1 class="h3 mb-0">Student Results Dashboard</h1>
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-light">
+            <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+        </a>
+    </div>
+</div>
+
+<div class="container">
+    <h2 class="mb-4 text-center">Search Student Results 🔍</h2>
+    
+    <div class="card p-4 mb-5">
+        <h5 class="card-title text-muted">Find Results by Registration Number or Course Code</h5>
+        <form action="{{ url_for('search_results') }}" method="POST" class="mt-3">
+            <div class="input-group">
+                <input type="text" name="search_query" class="form-control form-control-lg" placeholder="e.g., U12345 or CS101" value="{{ search_query or '' }}">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="fas fa-search me-2"></i>Search
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="table-container">
+        {% if all_results %}
+            <h4 class="mb-4">Showing {{ all_results|length }} Result{{ 's' if all_results|length != 1 else '' }}</h4>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col">Registration Number</th>
+                            <th scope="col">Course Code</th>
+                            <th scope="col">Score</th>
+                            <th scope="col">Grade</th>
+                            <th scope="col">Semester</th>
+                            <th scope="col">Academic Year</th>
+                            <th scope="col">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for result in all_results %}
+                        <tr>
+                            <td>{{ result.reg_number }}</td>
+                            <td>{{ result.course.course_code }}</td>
+                            <td>{{ result.total_score }}</td>
+                            <td>
+                                {% set grade_letter = "" %}
+                                {% if result.total_score >= 70 %}{% set grade_letter = "A" %}
+                                {% elif result.total_score >= 60 %}{% set grade_letter = "B" %}
+                                {% elif result.total_score >= 50 %}{% set grade_letter = "C" %}
+                                {% elif result.total_score >= 40 %}{% set grade_letter = "D" %}
+                                {% else %}{% set grade_letter = "F" %}
+                                {% endif %}
+                                <span class="grade-badge grade-{{ grade_letter }}">
+                                    {{ grade_letter }}
+                                </span>
+                            </td>
+                            <td>{{ result.semester }}</td>
+                            <td>{{ result.academic_year }}</td>
+                            <td>
+                                <button class="btn btn-info btn-sm print-btn" 
+                                        data-result="{{ {
+                                            'reg_number': result.reg_number,
+                                            'course_code': result.course.course_code,
+                                            'total_score': result.total_score,
+                                            'grade_letter': grade_letter,
+                                            'semester': result.semester,
+                                            'academic_year': result.academic_year
+                                        } | tojson }}">
+                                    <i class="fas fa-print me-1"></i>Print
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% elif search_query %}
+            <div class="alert alert-warning text-center" role="alert">
+                <h4 class="alert-heading">No Results Found</h4>
+                <p>We couldn't find any results matching your search for **"{{ search_query }}"**.</p>
+                <p class="mb-0">Please check your spelling and try again.</p>
+            </div>
+        {% else %}
+            <div class="alert alert-info text-center" role="alert">
+                <h4 class="alert-heading">Welcome!</h4>
+                <p>Use the search bar above to find student results by registration number or course code. All results are displayed by default.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+<script>
+    // Get all print buttons
+    const printButtons = document.querySelectorAll('.print-btn');
+
+    // Add click event listener to each print button
+    printButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Get the result data from the data-result attribute
+            const resultData = JSON.parse(this.dataset.result);
+            printResult(resultData);
+        });
+    });
+
+    /**
+     * Generates a printable HTML document for a single student result and initiates printing.
+     * @param {object} result - The student result object containing details.
+     */
+    function printResult(result) {
+        // Construct the HTML content for the new window
+        const printContent = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Student Result - ${result.reg_number}</title>
+                <style>
+                    body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+                    h1 { text-align: center; color: #333; margin-bottom: 30px; }
+                    p { margin-bottom: 10px; }
+                    strong { color: #007bff; }
+                    .grade-badge {
+                        font-weight: bold;
+                        padding: .4em .8em;
+                        border-radius: 1rem;
+                        color: white;
+                        display: inline-block;
+                        /* Match original grade colors */
+                        background-color: ${getGradeColor(result.grade_letter)}; 
+                    }
+                    /* Simple styling for print readability */
+                    @media print {
+                        body { margin: 0; padding: 0; }
+                    }
+                </style>
+            </head>
+            <body>
+                <h1>Student Result Report</h1>
+                <p><strong>Registration Number:</strong> ${result.reg_number}</p>
+                <p><strong>Course Code:</strong> ${result.course_code}</p>
+                <p><strong>Score:</strong> ${result.total_score}</p>
+                <p><strong>Grade:</strong> <span class="grade-badge">${result.grade_letter}</span></p>
+                <p><strong>Semester:</strong> ${result.semester}</p>
+                <p><strong>Academic Year:</strong> ${result.academic_year}</p>
+                <hr>
+                <p>This document was generated on: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}</p>
+            </body>
+            </html>
+        `;
+
+        // Open a new window
+        const printWindow = window.open('', '_blank');
+        if (printWindow) {
+            // Write the content to the new window
+            printWindow.document.write(printContent);
+            printWindow.document.close(); // Close the document to ensure content is rendered
+
+            // Wait for the content to load, then print
+            printWindow.onload = function() {
+                printWindow.focus(); // Focus the new window
+                printWindow.print(); // Open the print dialog
+            };
+        } else {
+            // Fallback for pop-up blockers
+            alert('Please allow pop-ups for this website to print results.');
+        }
+    }
+
+    /**
+     * Helper function to get the background color for a given grade letter.
+     * This ensures the printed document also shows the correct grade color.
+     * @param {string} gradeLetter - The grade letter (A, B, C, D, F).
+     * @returns {string} The corresponding hex color code.
+     */
+    function getGradeColor(gradeLetter) {
+        switch (gradeLetter) {
+            case 'A': return '#28a745'; // green
+            case 'B': return '#17a2b8'; // teal
+            case 'C': return '#ffc107'; // yellow
+            case 'D': return '#fd7e14'; // orange
+            case 'F': return '#dc3545'; // red
+            default: return '#6c757d'; // grey for unknown
+        }
+    }
+</script>
+</body>
+</html>

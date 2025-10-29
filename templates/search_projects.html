@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browse Projects - Tag & Search</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #eef2f7; /* Lighter blue-gray background */
+            color: #333;
+        }
+        .container {
+            max-width: 1000px; /* Wider container for better layout */
+            margin: 20px auto;
+            padding: 30px;
+            background-color: #ffffff;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); /* Stronger shadow */
+            border-radius: 15px;
+            animation: fadeIn 1s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        h1 {
+            text-align: center;
+            color: #1a237e; /* Deep blue */
+            font-size: 3em;
+            margin-bottom: 30px;
+            position: relative;
+            padding-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        h1::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            bottom: 0;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background-color: #007bff; /* Vibrant blue */
+            border-radius: 5px;
+        }
+
+        /* Search Form Styles */
+        .search-form {
+            background-color: #f8fbfd;
+            border: 1px solid #e3e8f0;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 30px;
+            display: flex;
+            flex-wrap: wrap; /* Allow wrapping on smaller screens */
+            gap: 20px;
+            align-items: flex-end; /* Align items to the bottom */
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        .form-group {
+            flex: 1; /* Distribute space evenly */
+            min-width: 180px; /* Minimum width for form fields */
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+            font-size: 0.95em;
+        }
+        .search-form input[type="text"],
+        .search-form select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #cce0f0; /* Lighter blue border */
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            box-sizing: border-box;
+            background-color: #fff;
+        }
+        .search-form input[type="text"]:focus,
+        .search-form select:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.15);
+            outline: none;
+        }
+        .search-form button {
+            background-color: #28a745; /* Green for search */
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 10px rgba(40, 167, 69, 0.2);
+        }
+        .search-form button:hover {
+            background-color: #218838; /* Darker green */
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(40, 167, 69, 0.3);
+        }
+
+        /* Tag Cloud / Filter Section */
+        .tag-cloud {
+            text-align: center;
+            margin-bottom: 40px;
+            background-color: #f0f7fb;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: inset 0 1px 5px rgba(0,0,0,0.05);
+        }
+        .tag-cloud h3 {
+            color: #1a237e;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+        .tag-cloud a {
+            display: inline-block;
+            background-color: #e9f0f7;
+            color: #007bff;
+            padding: 8px 15px;
+            margin: 5px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 0.9em;
+            transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s ease;
+            border: 1px solid #cce0f0;
+        }
+        .tag-cloud a:hover {
+            background-color: #007bff;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
+        }
+        .tag-cloud a.active {
+            background-color: #0056b3;
+            color: white;
+            border-color: #0056b3;
+            font-weight: bold;
+        }
+        .tag-cloud .no-tags {
+            font-style: italic;
+            color: #777;
+        }
+
+
+        /* Project Card Styles (reused from view_projects) */
+        .project-card {
+            background-color: #f9f9f9;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 25px;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .project-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+        .project-card h2 {
+            color: #007bff;
+            margin-top: 0;
+            font-size: 1.8em;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        .project-card p {
+            margin-bottom: 10px;
+        }
+        .project-card strong {
+            color: #555;
+        }
+        .project-card .label {
+            font-weight: bold;
+            color: #4a4a4a;
+        }
+        .project-card ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .project-card ul li {
+            background-color: #eaf6ff;
+            border-left: 4px solid #007bff;
+            padding: 8px 15px;
+            margin-bottom: 8px;
+            border-radius: 4px;
+        }
+        .no-projects {
+            text-align: center;
+            color: #777;
+            font-style: italic;
+            padding: 50px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .file-list {
+            list-style-type: disc;
+            padding-left: 20px;
+            margin-top: 5px;
+        }
+        .file-list li a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .file-list li a:hover {
+            text-decoration: underline;
+        }
+        .tags-display {
+            margin-top: 10px;
+        }
+        .tags-display .tag-item {
+            display: inline-block;
+            background-color: #d4edda; /* Light green */
+            color: #155724; /* Dark green */
+            padding: 4px 10px;
+            margin: 3px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            border: 1px solid #28a745;
+        }
+
+        /* Back to Home / Navigation Button */
+        .home-button {
+            display: block;
+            width: fit-content;
+            margin: 30px auto 0;
+            padding: 12px 25px;
+            background-color: #6c757d; /* Gray */
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: bold;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        .home-button:hover {
+            background-color: #5a6268;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .container {
+                margin: 20px auto;
+                padding: 20px;
+            }
+            h1 {
+                font-size: 2.2em;
+            }
+            .search-form {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .form-group {
+                min-width: unset; /* Remove min-width */
+                width: 100%; /* Take full width */
+            }
+            .search-form button {
+                width: 100%;
+                padding: 15px;
+            }
+            .tag-cloud a {
+                padding: 6px 12px;
+                font-size: 0.8em;
+            }
+        }
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.8em;
+                letter-spacing: 1px;
+            }
+            h1::after {
+                width: 70px;
+                height: 3px;
+            }
+            .container {
+                padding: 15px;
+            }
+            .search-form {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Browse Projects</h1>
+
+        <form class="search-form" method="GET" action="{{ url_for('browse_projects') }}">
+            <div class="form-group">
+                <label for="search_query">Search Keyword:</label>
+                <input type="text" id="search_query" name="search_query" 
+                       placeholder="e.g., AI, recycling, smart city" 
+                       value="{{ search_query }}">
+            </div>
+            <div class="form-group">
+                <label for="search_type">Search In:</label>
+                <select id="search_type" name="search_type">
+                    <option value="all" {% if search_type == 'all' %}selected{% endif %}>All Fields</option>
+                    <option value="title" {% if search_type == 'title' %}selected{% endif %}>Project Title</option>
+                    <option value="description" {% if search_type == 'description' %}selected{% endif %}>Description</option>
+                    <option value="innovations" {% if search_type == 'innovations' %}selected{% endif %}>Innovations</option>
+                    <option value="author" {% if search_type == 'author' %}selected{% endif %}>Author (Name/Reg No)</option>
+                    <option value="year" {% if search_type == 'year' %}selected{% endif %}>Year (YYYY)</option>
+                </select>
+            </div>
+            <button type="submit">Search</button>
+        </form>
+
+        <div class="tag-cloud">
+            <h3>Browse by Tag:</h3>
+            {% if all_tags %}
+                {% for tag in all_tags %}
+                    <a href="{{ url_for('browse_projects', tag=tag.name) }}" 
+                       class="{% if selected_tag_name == tag.name %}active{% endif %}">
+                        {{ tag.name }}
+                    </a>
+                {% endfor %}
+                {% if selected_tag_name %}
+                    <a href="{{ url_for('browse_projects') }}">Clear Tag Filter</a>
+                {% endif %}
+            {% else %}
+                <p class="no-tags">No tags available yet.</p>
+            {% endif %}
+        </div>
+
+        {% if project_ideas %}
+            {% for idea in project_ideas %}
+                <div class="project-card">
+                    <h2>{{ idea.title }}</h2>
+                    <p><span class="label">Submitted On:</span> {{ idea.submission_date.strftime('%Y-%m-%d %H:%M') }}</p>
+                    <p><span class="label">Contact Email:</span> {{ idea.contact_email }}</p>
+                    <p><span class="label">Description:</span> {{ idea.description }}</p>
+                    
+                    {% if idea.innovations %}
+                        <p><span class="label">Key Innovations:</span></p>
+                        <p>{{ idea.innovations }}</p>
+                    {% endif %}
+
+                    {% if idea.file_paths %}
+                        <p><span class="label">Supporting Files:</span></p>
+                        <ul class="file-list">
+                            {% for file_path in idea.file_paths.split(',') %}
+                                <li><a href="{{ url_for('static', filename='project_uploads/' + file_path.strip()) }}" target="_blank">{{ file_path.strip() }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+
+                    {% if idea.author %}
+                        <p><span class="label">Submitted By:</span> {{ idea.author.fullname }} (Reg No: {{ idea.author.regno }})</p>
+                    {% else %}
+                        <p><span class="label">Submitted By:</span> Anonymous User</p>
+                    {% endif %}
+
+                    {# Display actual tags if using a relationship #}
+                    {% if idea.tags %}
+                        <div class="tags-display">
+                            <span class="label">Tags:</span>
+                            {% for tag in idea.tags %}
+                                <span class="tag-item">{{ tag.name }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="no-projects">
+                <p>No project ideas found matching your criteria.</p>
+                <p>Try a different search or <a href="{{ url_for('browse_projects') }}">view all projects</a>.</p>
+            </div>
+        {% endif %}
+
+        <a href="{{ url_for('index') }}" class="home-button">Back to Home / Submit Idea</a>
+    </div>
+</body>
+</html>

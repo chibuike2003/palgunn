@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Report Technical Issue</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f7f9fc;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 60px auto;
+            background-color: #fff;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border-radius: 12px;
+        }
+
+        h2 {
+            text-align: center;
+            color: #2c3e50;
+        }
+
+        label {
+            font-weight: 600;
+            margin-bottom: 6px;
+            display: block;
+            color: #34495e;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccd1d9;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        button {
+            background-color: #3498db;
+            color: #fff;
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Need Help? Report a Technical Issue</h2>
+    <form method="POST" action="/report-issue">
+                                         {% with messages = get_flashed_messages(with_categories=true) %}
+                                            {% if messages %}
+                                                {% for category, message in messages %}
+                                                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                                    {{ message }}
+                                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                                </div>
+                                                {% endfor %}
+                                            {% endif %}
+                                            {% endwith %}
+        <label for="issue_type">Issue Type</label>
+        <select id="issue_type" name="issue_type" onchange="toggleOtherField()" required>
+            <option value="">Select an issue</option>
+            <option value="login">Login Problem</option>
+            <option value="wallet">Wallet Verification</option>
+            <option value="bug">Bug/Error</option>
+            <option value="feedback">Send Feedback</option>
+            <option value="other">Other</option>
+        </select>
+
+        <div id="other_issue_field" class="hidden">
+            <label for="other_issue">Please specify your issue</label>
+            <input type="text" id="other_issue" name="other_issue">
+        </div>
+
+        <label for="description">Describe the Issue</label>
+        <textarea id="description" name="description" placeholder="Explain the issue in detail..." required></textarea>
+
+        <button type="submit">Submit Request</button>
+    </form>
+</div>
+
+<script>
+    function toggleOtherField() {
+        const issueType = document.getElementById('issue_type').value;
+        const otherField = document.getElementById('other_issue_field');
+
+        if (issueType === 'other') {
+            otherField.classList.remove('hidden');
+            document.getElementById('other_issue').required = true;
+        } else {
+            otherField.classList.add('hidden');
+            document.getElementById('other_issue').required = false;
+        }
+    }
+</script>
+</body>
+</html>

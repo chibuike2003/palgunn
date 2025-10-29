@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expand Your Team - ProjectFlow</title>
+    <link rel="stylesheet" href="../static/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="navbar">
+        <div class="container">
+            <a href="discover_projects.html" class="logo">ProjectFlow</a>
+            <nav>
+                <ul>
+                    <li><a href="discover_projects.html">Discover</a></li>
+                    <li><a href="my_forked_project.html">My Projects</a></li>
+                    <li><a href="#">Community</a></li>
+                    <li><a href="#" class="btn btn-primary">Sign In</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="container invite-section">
+            <h2>Expand Your Team</h2>
+            <p style="text-align: center; margin-bottom: 40px; font-size: 1.1rem; color: var(--secondary-color);">Share your unique vision with the world, or collaborate with specific individuals.</p>
+
+            <div class="invite-option">
+                <h3>Invite Platform Users</h3>
+                <p>Search for and invite existing ProjectFlow members to collaborate on your project.</p>
+                <div class="platform-invite-form">
+                    <input type="text" id="userSearchInput" placeholder="Search for username or email..." required>
+                    <button id="searchUsersBtn" class="btn btn-primary"><i class="fas fa-search"></i> Search Users</button>
+                </div>
+                <div id="userSearchResults" class="user-search-results">
+                    <p class="no-results" style="display: none;">No users found matching your search.</p>
+                </div>
+            </div>
+
+            <div class="invite-option">
+                <h3>Invite by Email</h3>
+                <p>Send an invitation directly to collaborators via email.</p>
+                <form class="email-invite-form">
+                    <input type="email" placeholder="Enter collaborator's email" required>
+                    <button type="submit" class="btn btn-primary">Send Invite</button>
+                </form>
+                <textarea placeholder="Add a personalized message (optional)" rows="4" style="width: 100%; max-width: 600px; margin-top: 15px; padding: 10px; border: 1px solid var(--border-color); border-radius: 5px; font-family: 'Poppins', sans-serif;"></textarea>
+            </div>
+
+            <div class="invite-option">
+                <h3>Generate Shareable Link</h3>
+                <p>Create a link that you can share anywhere to invite collaborators.</p>
+                <div class="share-link-box">
+                    <input type="text" id="shareLinkInput" value="https://projectflow.com/fork/your-chatbot-project-id" readonly>
+                    <button id="copyShareLink" class="btn btn-secondary">Copy Link</button>
+                </div>
+            </div>
+
+            <div class="invite-option">
+                <h3>Share on Social Media</h3>
+                <p>Spread the word and find collaborators through your social networks.</p>
+                <div class="social-share-buttons">
+                    <a href="https://twitter.com/intent/tweet?text=Check%20out%20my%20new%20AI%20Chatbot%20project%20on%20ProjectFlow!%20Join%20me%20to%20collaborate%3A%20https%3A%2F%2Fprojectflow.com%2Ffork%2Fyour-chatbot-project-id" target="_blank"><i class="fab fa-twitter"></i></a>
+                    <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fprojectflow.com%2Ffork%2Fyour-chatbot-project-id&title=My%20AI%20Chatbot%20Project%20on%20ProjectFlow&summary=I%27m%20building%20an%20AI%20chatbot%20for%20customer%20support%20and%20looking%20for%20collaborators!" target="_blank"><i class="fab fa-linkedin"></i></a>
+                    <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fprojectflow.com%2Ffork%2Fyour-chatbot%2Dproject%2Did" target="_blank"><i class="fab fa-facebook"></i></a>
+                </div>
+            </div>
+
+            <p style="text-align: center; margin-top: 50px; font-size: 1.1rem; color: var(--dark-text);">Team up to accelerate development, get fresh perspectives, and create something truly remarkable.</p>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 ProjectFlow. All rights reserved.</p>
+        </div>
+    </footer>
+    <script src="https://kit.fontawesome.com/your-font-awesome-kit-id.js" crossorigin="anonymous"></script>
+    <script src="../static/script.js"></script>
+</body>
+</html>

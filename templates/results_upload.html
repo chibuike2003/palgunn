@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course & Student Results Upload Form (Bulk Entry)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for Inter font and general body */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Light gray background */
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Align to top for longer forms */
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        .container {
+            max-width: 960px; /* Max width for the form container */
+            width: 100%;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 2.5rem;
+        }
+        input[type="text"],
+        input[type="number"],
+        select,
+        textarea { /* Added textarea */
+            border: 1px solid #d1d5db; /* Light gray border */
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            width: 100%;
+            transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        select:focus,
+        textarea:focus { /* Added textarea */
+            border-color: #3b82f6; /* Blue border on focus */
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25); /* Light blue shadow on focus */
+            outline: none;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #4b5563; /* Darker gray text */
+        }
+        .form-section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 0.75rem;
+        }
+        .btn-primary {
+            background-color: #2563eb; /* Darker blue */
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+        }
+        .btn-primary:hover {
+            background-color: #1d4ed8; /* Even darker blue on hover */
+        }
+        /* Hide scrollbar for number inputs */
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+        .error-message {
+            color: #ef4444; /* Red text for errors */
+            font-size: 0.875rem; /* Small text */
+            margin-top: 0.5rem;
+        }
+        .flash-message {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+        .flash-message.error {
+            background-color: #fee2e2;
+            color: #dc2626;
+            border: 1px solid #ef4444;
+        }
+        .flash-message.success {
+            background-color: #d1fae5;
+            color: #047857;
+            border: 1px solid #10b981;
+        }
+        .flash-message.warning {
+            background-color: #fffbeb;
+            color: #d97706;
+            border: 1px solid #f59e0b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-8">Course & Student Results (Bulk Entry)</h1>
+
+        {# Flash messages #}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="mb-4">
+                    {% for category, message in messages %}
+                        <div class="flash-message {{ category }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <form id="registrationForm" class="space-y-8" method="POST" action="{{ url_for('upload_results') }}">
+            <div class="space-y-6">
+                <h2 class="form-section-title">Course Details</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="courseCode">Course Code:</label>
+                        <input type="text" id="courseCode" name="courseCode" placeholder="e.g., CSC101" required value="{{ form_data.courseCode if form_data else '' }}">
+                    </div>
+                    <div>
+                        <label for="courseTitle">Course Title:</label>
+                        <input type="text" id="courseTitle" name="courseTitle" placeholder="e.g., Introduction to Computer Science" required value="{{ form_data.courseTitle if form_data else '' }}">
+                    </div>
+                    <div>
+                        <label for="sessionWritten">Session Written:</label>
+                        <input type="text" id="sessionWritten" name="sessionWritten" placeholder="e.g., 2024/2025 Harmattan" required value="{{ form_data.sessionWritten if form_data else '' }}">
+                    </div>
+                    <div>
+                        <label for="year">Year:</label>
+                        <select id="year" name="year" required>
+                            <option value="">Select Year</option>
+                            <option value="first_year" {% if form_data and form_data.year == 'first_year' %}selected{% endif %}>First Year</option>
+                            <option value="second_year" {% if form_data and form_data.year == 'second_year' %}selected{% endif %}>Second Year</option>
+                            <option value="third_year" {% if form_data and form_data.year == 'third_year' %}selected{% endif %}>Third Year</option>
+                            <option value="fourth_year" {% if form_data and form_data.year == 'fourth_year' %}selected{% endif %}>Fourth Year</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="semester">Semester:</label>
+                        <select id="semester" name="semester" required>
+                            <option value="">Select Semester</option>
+                            <option value="first_semester" {% if form_data and form_data.semester == 'first_semester' %}selected{% endif %}>First Semester</option>
+                            <option value="second_semester" {% if form_data and form_data.semester == 'second_semester' %}selected{% endif %}>Second Semester</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-6">
+                <h2 class="form-section-title">Bulk Student Details</h2>
+                <p class="text-gray-600 mb-4">Enter each student's data on a new line, or separated by commas. Ensure the order matches across fields (e.g., 1st name corresponds to 1st reg number, 1st CA score, 1st exam score).</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="studentNamesBulk">Student Names (each on a new line or comma-separated):</label>
+                        <textarea id="studentNamesBulk" name="studentNamesBulk" rows="5" placeholder="John Doe, Jane Smith&#10;Alice Johnson" required>{{ form_data.studentNamesBulk if form_data else '' }}</textarea>
+                        <p id="namesError" class="error-message"></p>
+                    </div>
+                    <div>
+                        <label for="regNumbersBulk">Registration Numbers (each on a new line or comma-separated):</label>
+                        <textarea id="regNumbersBulk" name="regNumbersBulk" rows="5" placeholder="U18CS001, U18CS002&#10;U18CS003" required>{{ form_data.regNumbersBulk if form_data else '' }}</textarea>
+                        <p id="regNosError" class="error-message"></p>
+                    </div>
+                    <div>
+                        <label for="caScoresBulk">CA Scores (out of 30, each on a new line or comma-separated):</label>
+                        <textarea id="caScoresBulk" name="caScoresBulk" rows="5" placeholder="35, 28&#10;40" required>{{ form_data.caScoresBulk if form_data else '' }}</textarea>
+                        <p id="caScoresError" class="error-message"></p>
+                    </div>
+                    <div>
+                        <label for="examScoresBulk">Exam Scores (out of 70, each on a new line or comma-separated):</label>
+                        <textarea id="examScoresBulk" name="examScoresBulk" rows="5" placeholder="50, 45&#10;58" required>{{ form_data.examScoresBulk if form_data else '' }}</textarea>
+                        <p id="examScoresError" class="error-message"></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-center mt-8">
+                <button type="submit" class="btn-primary">Submit Form</button>
+            </div>
+            <a href="{{ url_for('display_uploaded_results') }}" class="btn-primary flex items-center justify-center">View Results Page</a> {# New button #}
+
+        </form>
+    </div>
+
+    <script>
+        // Note: The JavaScript validation in the HTML is client-side.
+        // It's good for immediate feedback but *must* be duplicated on the server-side
+        // for security and data integrity, as done in app.py.
+
+        /**
+         * Parses a string of values separated by commas or newlines into an array.
+         * Also trims whitespace from each value.
+         * @param {string} inputString - The string from the textarea.
+         * @returns {string[]} An array of cleaned strings.
+         */
+        function parseInput(inputString) {
+            return inputString
+                .split(/[\n,]+/) // Split by new line or comma
+                .map(item => item.trim()) // Trim whitespace from each item
+                .filter(item => item !== ''); // Remove empty strings
+        }
+
+        /**
+         * Validates if all arrays have the same length.
+         * @param {Array[]} arrays - An array of arrays to compare lengths.
+         * @returns {boolean} True if all arrays have the same length, false otherwise.
+         */
+        function haveSameLength(arrays) {
+            if (arrays.length === 0) return true;
+            const firstLength = arrays[0].length;
+            return arrays.every(arr => arr.length === firstLength);
+        }
+
+        document.getElementById('registrationForm').addEventListener('submit', function(event) {
+            // Client-side validation for immediate user feedback
+            // Server-side validation (in app.py) is the authoritative one.
+
+            // Clear previous errors (client-side specific)
+            document.getElementById('namesError').textContent = '';
+            document.getElementById('regNosError').textContent = '';
+            document.getElementById('caScoresError').textContent = '';
+            document.getElementById('examScoresError').textContent = '';
+
+            const studentNamesRaw = document.getElementById('studentNamesBulk').value;
+            const regNumbersRaw = document.getElementById('regNumbersBulk').value;
+            const caScoresRaw = document.getElementById('caScoresBulk').value;
+            const examScoresRaw = document.getElementById('examScoresBulk').value;
+
+            const names = parseInput(studentNamesRaw);
+            const regNumbers = parseInput(regNumbersRaw);
+            const caScores = parseInput(caScoresRaw);
+            const examScores = parseInput(examScoresRaw);
+
+            let clientSideValid = true;
+
+            if (!haveSameLength([names, regNumbers, caScores, examScores])) {
+                const errorMessage = 'All bulk input fields must have the same number of entries.';
+                document.getElementById('namesError').textContent = errorMessage;
+                document.getElementById('regNosError').textContent = errorMessage;
+                document.getElementById('caScoresError').textContent = errorMessage;
+                document.getElementById('examScoresError').textContent = errorMessage;
+                clientSideValid = false;
+            }
+
+            if (names.length === 0) {
+                document.getElementById('namesError').textContent = 'Please enter at least one student entry.';
+                clientSideValid = false;
+            }
+
+
+            for (let i = 0; i < names.length; i++) {
+                const ca = parseFloat(caScores[i]);
+                const exam = parseFloat(examScores[i]);
+
+                if (isNaN(ca) || ca < 0 || ca > 30) {
+                    document.getElementById('caScoresError').textContent = `CA Score for entry ${i + 1} is invalid (must be 0-30).`;
+                    clientSideValid = false;
+                }
+                if (isNaN(exam) || exam < 0 || exam > 70) {
+                    document.getElementById('examScoresError').textContent = `Exam Score for entry ${i + 1} is invalid (must be 0-70).`;
+                    clientSideValid = false;
+                }
+            }
+
+            if (!clientSideValid) {
+                event.preventDefault(); // Prevent submission if client-side validation fails
+                alert('Please correct the errors in the form.');
+            }
+            // If clientSideValid is true, the form will submit normally to the Flask backend.
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to UNN Portal</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Custom CSS for background animation and entrance animations */
+        body {
+            font-family: 'Inter', sans-serif;
+            /* Changed background to a green gradient */
+            background: linear-gradient(135deg, #a8e063, #56ab2f); /* Green gradient */
+            background-size: 400% 400%;
+            animation: gradientAnimation 15s ease infinite;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px; /* Add some padding for smaller screens */
+            box-sizing: border-box; /* Ensure padding is included in element's total width and height */
+        }
+
+        @keyframes gradientAnimation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Entrance animation for elements */
+        .fade-in-up {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 1s ease-out forwards;
+        }
+
+        .fade-in-up.delay-1 { animation-delay: 0.3s; }
+        .fade-in-up.delay-2 { animation-delay: 0.6s; }
+        .fade-in-up.delay-3 { animation-delay: 0.9s; }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Button hover effect */
+        .btn-hover-scale {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .btn-hover-scale:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-white p-8 md:p-12 lg:p-16 rounded-3xl shadow-2xl text-center max-w-md w-full mx-auto transform hover:scale-105 transition-transform duration-500 ease-in-out">
+        <!-- Main Heading with animation -->
+        <h1 class="text-4xl md:text-5xl font-extrabold text-gray-800 mb-4 fade-in-up">
+            Welcome to <span class="text-indigo-600">UNN Portal</span>
+        </h1>
+
+        <!-- Sub-heading/Description with animation -->
+        <p class="text-lg md:text-xl text-gray-600 mb-8 fade-in-up delay-1">
+            Access the official University of Nigeria, Nsukka portal for students, staff, and visitors.
+        </p>
+
+        <!-- Button/Link to UNN Portal with animation and hover effect -->
+        <a href="https://www.unn.edu.ng/" target="_blank" rel="noopener noreferrer"
+           class="inline-block bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold py-3 px-8 rounded-full shadow-lg hover:from-indigo-600 hover:to-purple-700 btn-hover-scale fade-in-up delay-2">
+            Go to UNN Portal
+        </a>
+
+        <!-- Small footer/note with animation -->
+        <p class="text-sm text-gray-500 mt-8 fade-in-up delay-3">
+            &copy; 2025 University of Nigeria, Nsukka. All rights reserved.
+        </p>
+    </div>
+</body>
+</html>
