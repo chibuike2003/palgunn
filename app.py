@@ -26,7 +26,7 @@ app = Flask(__name__)
 
 # --- Configuration ---
 app.config['SECRET_KEY'] = 'fdtygt5e5re4ere43rt435erdrs34e56fdrde3w22121234567ytgytuih8uijhu87y6fvb' # A strong, unique secret key
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///pal.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///publicadmindepa.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False # Recommended to disable
 app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'static', 'uploads') # Absolute path for file uploads
 
@@ -452,7 +452,7 @@ def load_user(user_id):
     return user
 # -----------------
 #home
-@app.route('/home', methods=['GET', 'POST'])
+@app.route('/', methods=['GET', 'POST'])
 def index():
         return render_template('index.html',)
 
@@ -1823,7 +1823,10 @@ def add_dues():
 
     return render_template('admin_adddues.html')
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 1a1109959d9be0cda2b3c0d3f8edc95556636444
 @app.route('/admin_addcandidate', methods=['GET', 'POST'])
 def add_candidate():
     if 'admin_id' not in session:
@@ -1909,6 +1912,11 @@ def add_candidate():
         candidates_by_position[position].append(candidate)
 
     return render_template('admin_addcandidates.html', candidates_by_position=candidates_by_position)
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> 1a1109959d9be0cda2b3c0d3f8edc95556636444
 @app.route('/results')
 def results():
     if 'user_id' not in session:
