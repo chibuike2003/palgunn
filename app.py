@@ -452,7 +452,7 @@ def load_user(user_id):
     return user
 # -----------------
 #home
-@app.route('/home', methods=['GET', 'POST'])
+@app.route('/', methods=['GET', 'POST'])
 def index():
         return render_template('index.html',)
 
