@@ -1674,7 +1674,10 @@ def admin_login():
 
         # This is the line you need to make sure is active and correct
         # It assumes you have SQLAlchemy or similar set up where Admin.query is available
-        admin = Admin.query.filter_by(username=username).first()
+        try:
+            admin = Admin.query.filter_by(username=username).first()
+        except Exception as e:
+            print(e)
 
         if admin and admin.check_password(password):
             session['admin_id'] = admin.id
@@ -1819,6 +1822,8 @@ def add_dues():
         return redirect(url_for('add_dues'))
 
     return render_template('admin_adddues.html')
+
+
 @app.route('/admin_addcandidate', methods=['GET', 'POST'])
 def add_candidate():
     if 'admin_id' not in session:
@@ -1831,29 +1836,44 @@ def add_candidate():
         position = request.form['position']
         profile_pic = request.files['profile_pic']
 
+        # 1. Find the User associated with the registration number
+        # This is the new crucial step since regno is now on the User model
+        user_to_register = User.query.filter_by(regno=regno).first()
+
+        if not user_to_register:
+            flash(f"User with Registration Number {regno} does not exist.", "danger")
+            return redirect(url_for('add_candidate'))
+
+        # 2. Check Dues using the user's regno (This remains the same if AdminAddDues uses regno)
         dues_paid = AdminAddDues.query.filter_by(regno=regno).first()
         if not dues_paid:
             flash("Candidate has not paid departmental dues.", "danger")
             return redirect(url_for('add_candidate'))
 
-        already_registered = ElectoralCandidate.query.filter_by(regno=regno).first()
+        # 3. Check if the User is already registered as a Candidate
+        #    We now check the ElectoralCandidate table using the user's ID
+        already_registered = ElectoralCandidate.query.filter_by(user_id=user_to_register.id).first() 
+        
         if already_registered:
-            flash("Candidate already registered.", "warning")
+            flash("Candidate already registered for a position.", "warning")
             return redirect(url_for('add_candidate'))
 
         if not profile_pic:
             flash("Please upload a profile picture.", "danger")
             return redirect(url_for('add_candidate'))
 
+        # --- File Upload Logic ---
         filename = secure_filename(profile_pic.filename)
         upload_folder = os.path.join('static', 'uploads')
         os.makedirs(upload_folder, exist_ok=True)
         profile_path = os.path.join(upload_folder, filename)
         profile_pic.save(profile_path)
+        # --- End File Upload Logic ---
 
+        # 4. Create the new candidate using user_id
+        # We no longer save fullname or regno directly on ElectoralCandidate
         new_candidate = ElectoralCandidate(
-            fullname=fullname,
-            regno=regno,
+            user_id=user_to_register.id, # Link the candidate profile to the User
             position=position,
             profile_pic=filename
         )
@@ -1863,7 +1883,7 @@ def add_candidate():
         flash("Candidate added successfully.", "success")
         return redirect(url_for('add_candidate'))
 
-    # GET request - fetch candidates and their vote counts
+    # --- GET request - fetch candidates and their vote counts ---
     all_candidates = ElectoralCandidate.query.all()
     vote_counts = db.session.query(
         Vote.candidate_id,
@@ -1877,12 +1897,18 @@ def add_candidate():
     for candidate in all_candidates:
         position = candidate.position
         candidate.vote_count = vote_dict.get(candidate.id, 0)  # Add vote_count dynamically
+        
+        # NOTE: To use candidate.fullname and candidate.regno in the template, 
+        # the User model and its relationship MUST be loaded.
+        # You might need to add: candidate.fullname = candidate.user.fullname 
+        # and candidate.regno = candidate.user.regno 
+        # to the candidate object here if they aren't available via the template logic.
+
         if position not in candidates_by_position:
             candidates_by_position[position] = []
         candidates_by_position[position].append(candidate)
 
     return render_template('admin_addcandidates.html', candidates_by_position=candidates_by_position)
-
 @app.route('/results')
 def results():
     if 'user_id' not in session:
