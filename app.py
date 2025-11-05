@@ -26,7 +26,7 @@ app = Flask(__name__)
 
 # --- Configuration ---
 app.config['SECRET_KEY'] = 'fdtygt5e5re4ere43rt435erdrs34e56fdrde3w22121234567ytgytuih8uijhu87y6fvb' # A strong, unique secret key
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///publicadmindepa.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///publicadmindepart.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False # Recommended to disable
 app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'static', 'uploads') # Absolute path for file uploads
 
@@ -74,7 +74,6 @@ def load_user(user_id):
 
 
 
-
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     fullname = db.Column(db.String(100), nullable=False)
@@ -85,12 +84,10 @@ class User(db.Model):
     password = db.Column(db.String(200), nullable=False)
     public_key = db.Column(db.Text, nullable=True)
 
-    # Define relationships for messages using back_populates
+    # Define relationships for messages (assuming Message and ProjectIdea models exist)
     sent_messages = db.relationship('Message', foreign_keys='Message.sender_id', back_populates='sender', lazy=True)
     received_messages = db.relationship('Message', foreign_keys='Message.recipient_id', back_populates='recipient', lazy=True)
-    # The fix is on the line above: back_populates instead of back_popates
-
-    project_ideas = db.relationship('ProjectIdea', backref='author', lazy=True) # Assuming ProjectIdea model exists
+    project_ideas = db.relationship('ProjectIdea', backref='author', lazy=True) 
 
     def __repr__(self):
         return f"User('{self.fullname}', '{self.email}')"
@@ -107,7 +104,6 @@ class User(db.Model):
 
     def get_id(self):
         return str(self.id)
-
 # Your ElectoralCandidate class would then be defined as discussed in the previous response,
 # linking to the User model correctly.
 class ElectoralCandidate(db.Model):
@@ -467,9 +463,9 @@ def helpcontact():
     return render_template('helpcontact.html')
 
 
-# Signup Route
-# -----------------
-
+# -------------------------------------------------------------------
+# 2. Signup Route
+# -------------------------------------------------------------------
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
@@ -484,8 +480,18 @@ def signup():
             flash('Passwords do not match.', 'danger')
             return redirect(url_for('signup'))
 
+        # Initialize variable to prevent UnboundLocalError on database failure
+        existing_user = None 
+        
         # Check for existing email or reg number
-        existing_user = User.query.filter((User.email == email) | (User.regno == regno)).first()
+        try:
+            existing_user = User.query.filter((User.email == email) | (User.regno == regno)).first()
+        except Exception as e:
+            # This is where the error jumps if the 'user' table is missing!
+            print(f"Database Error during signup query: {e}")
+            flash('A server error occurred during registration. Please try again.', 'danger')
+            return redirect(url_for('signup'))
+            
         if existing_user:
             flash('Email or Registration Number already exists, please log in', 'danger')
             return redirect(url_for('login'))
@@ -493,18 +499,62 @@ def signup():
         # Create new user
         hashed_password = generate_password_hash(password)
         new_user = User(fullname=fullname, email=email, regno=regno, phone=phone, password=hashed_password)
-        db.session.add(new_user)
-        db.session.commit()
+        
+        # Save new user to database
+        try:
+            db.session.add(new_user)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            print(f"Database Error during user save: {e}")
+            flash('Failed to create account due to a database error.', 'danger')
+            return redirect(url_for('signup'))
 
-        # Send Welcome Email
+        # Send Welcome Email (commented out)
         # send_welcome_email(email, fullname)
 
         flash('Account created successfully! Please log in.', 'success')
         return redirect(url_for('login'))
 
+    # Placeholder for a missing template if not using render_template
+    # return "Signup Form Here" 
     return render_template('signup.html')
 
 
+# -------------------------------------------------------------------
+# 3. Login Route
+# -------------------------------------------------------------------
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        email = request.form['loginEmail']
+        password = request.form['loginPassword']
+        
+        # Initialize user to None to prevent UnboundLocalError on database failure
+        user = None 
+        
+        try:
+            # Query the database for the user
+            user = User.query.filter_by(email=email).first()
+        except Exception as e:
+            # This is where the error jumps if the 'user' table is missing!
+            print(f"Database Error during login query: {e}") 
+            flash('A database error occurred during login. Please try again.', 'danger')
+            return redirect(url_for('login'))
+
+        # Check if user exists and password is correct
+        if user and check_password_hash(user.password, password):
+            session['user_id'] = user.id
+            flash('Login successful!', 'success')
+            # Assuming 'dashboard' route exists
+            return redirect(url_for('dashboard'))
+        else:
+            flash('Invalid credentials.', 'danger')
+            return redirect(url_for('login'))
+
+    # Placeholder for a missing template if not using render_template
+    # return "Login Form Here"
+    return render_template('login.html')
 # -----------------
 # Welcome Email Function
 # -----------------
@@ -531,24 +581,6 @@ def logout():
     session.clear()
     flash('Logged out successfully.', 'info')
     return redirect(url_for('login'))
-
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        email = request.form['loginEmail']
-        password = request.form['loginPassword']
-        user = User.query.filter_by(email=email).first()
-
-        if user and check_password_hash(user.password, password):
-            session['user_id'] = user.id
-            flash('Login successful!', 'success')
-            return redirect(url_for('dashboard'))
-        else:
-            flash('Invalid credentials.', 'danger')
-            return redirect(url_for('login'))
-
-    return render_template('login.html')
-
 
 @app.route('/dashboard')
 def dashboard():
@@ -584,14 +616,20 @@ def friendrequest():
 
         if action == 'send':
             # Check if request already exists
-            existing_request = FriendRequest.query.filter_by(sender_id=user.id, receiver_id=receiver_id).first()
+            try:
+                existing_request = FriendRequest.query.filter_by(sender_id=user.id, receiver_id=receiver_id).first()
+            except Exception as e:
+                        print(e)
             if not existing_request:
                 new_request = FriendRequest(sender_id=user.id, receiver_id=receiver_id, status='pending')
                 db.session.add(new_request)
                 db.session.commit()
                 flash('Friend request sent successfully!', 'success')
         elif action == 'cancel':
-            existing_request = FriendRequest.query.filter_by(sender_id=user.id, receiver_id=receiver_id).first()
+            try:
+                existing_request = FriendRequest.query.filter_by(sender_id=user.id, receiver_id=receiver_id).first()
+            except Exception as e:
+                        print(e)
             if existing_request:
                 db.session.delete(existing_request)
                 db.session.commit()
@@ -1141,7 +1179,10 @@ def browse_projects():
     if not user:
         flash("User not found.", "danger")
         return redirect(url_for('login'))
-    dues_record = AdminAddDues.query.filter_by(regno=user.regno).first()
+    try:
+        dues_record = AdminAddDues.query.filter_by(regno=user.regno).first()
+    except Exception as e:
+                print(e)
     if not dues_record:
         flash("You are not eligible to search any project. Please ensure your dues are cleared or contact the excos.", "warning")
         return redirect(url_for('dashboard'))
@@ -1427,7 +1468,10 @@ def create_blog_post():
     # currently authenticated user's session (e.g., using Flask-Login: current_user.id).
     # For this demonstration, let's assume a user exists.
     # We will try to find a user by their full name, or create a dummy one if not found.
-    user = User.query.filter_by(fullname=author_name).first()
+    try:
+        user = User.query.filter_by(fullname=author_name).first()
+    except Exception as e:
+                print(e)
     if not user:
         # If user not found, create a dummy user for the purpose of saving the blog.
         # In a real app, users would register and log in.
@@ -1550,7 +1594,10 @@ def update_profile():
         return redirect(url_for('updateprofile'))
 
     # Check if email is already in use by another user (excluding the current user)
-    existing_user_with_email = User.query.filter_by(email=new_email).first()
+    try:
+        existing_user_with_email = User.query.filter_by(email=new_email).first()
+    except Exception as e:
+                print(e)
 
     # Now, 'user' is guaranteed to be a User object from Flask-Login, so user.id will work
     if existing_user_with_email and existing_user_with_email.id != user.id:
@@ -1697,13 +1744,19 @@ def admin_signup():
         email = request.form['email']
         username = request.form['username']
         password = request.form['password']
-
-        if Admin.query.filter_by(username=username).first():
-            flash('Username already exists!', 'danger')
-            return redirect(url_for('admin_signup'))
-        if Admin.query.filter_by(email=email).first():
-            flash('Email already registered!', 'danger')
-            return redirect(url_for('admin_signup'))
+        
+        try:
+            if Admin.query.filter_by(username=username).first():
+                flash('Username already exists!', 'danger')
+                return redirect(url_for('admin_signup'))
+        except Exception as e:
+                    print(e)
+        try:
+            if Admin.query.filter_by(email=email).first():
+                flash('Email already registered!', 'danger')
+                return redirect(url_for('admin_signup'))
+        except Exception as e:
+                    print(e)
 
         new_admin = Admin(fullname=fullname, email=email, username=username)
         new_admin.set_password(password)
@@ -1823,10 +1876,6 @@ def add_dues():
 
     return render_template('admin_adddues.html')
 
-<<<<<<< HEAD
-
-=======
->>>>>>> 1a1109959d9be0cda2b3c0d3f8edc95556636444
 @app.route('/admin_addcandidate', methods=['GET', 'POST'])
 def add_candidate():
     if 'admin_id' not in session:
@@ -1841,22 +1890,32 @@ def add_candidate():
 
         # 1. Find the User associated with the registration number
         # This is the new crucial step since regno is now on the User model
-        user_to_register = User.query.filter_by(regno=regno).first()
+        try:
+            user_to_register = User.query.filter_by(regno=regno).first()
+        except Exception as e:
+            print(e)
+
 
         if not user_to_register:
             flash(f"User with Registration Number {regno} does not exist.", "danger")
             return redirect(url_for('add_candidate'))
 
         # 2. Check Dues using the user's regno (This remains the same if AdminAddDues uses regno)
-        dues_paid = AdminAddDues.query.filter_by(regno=regno).first()
+        try:
+            dues_paid = AdminAddDues.query.filter_by(regno=regno).first()
+        except Exception as e:
+                    print(e)
         if not dues_paid:
             flash("Candidate has not paid departmental dues.", "danger")
             return redirect(url_for('add_candidate'))
 
         # 3. Check if the User is already registered as a Candidate
         #    We now check the ElectoralCandidate table using the user's ID
-        already_registered = ElectoralCandidate.query.filter_by(user_id=user_to_register.id).first() 
-        
+        try:
+            already_registered = ElectoralCandidate.query.filter_by(user_id=user_to_register.id).first() 
+        except Exception as e:
+                    print(e)
+                
         if already_registered:
             flash("Candidate already registered for a position.", "warning")
             return redirect(url_for('add_candidate'))
@@ -1887,7 +1946,10 @@ def add_candidate():
         return redirect(url_for('add_candidate'))
 
     # --- GET request - fetch candidates and their vote counts ---
-    all_candidates = ElectoralCandidate.query.all()
+    try:
+        all_candidates = ElectoralCandidate.query.all()
+    except Exception as e:
+                print(e)
     vote_counts = db.session.query(
         Vote.candidate_id,
         db.func.count(Vote.id).label('vote_count')
@@ -1912,11 +1974,8 @@ def add_candidate():
         candidates_by_position[position].append(candidate)
 
     return render_template('admin_addcandidates.html', candidates_by_position=candidates_by_position)
-<<<<<<< HEAD
-=======
 
 
->>>>>>> 1a1109959d9be0cda2b3c0d3f8edc95556636444
 @app.route('/results')
 def results():
     if 'user_id' not in session:
@@ -1953,14 +2012,19 @@ def vote():
     if not user:
         flash("User not found.", "danger")
         return redirect(url_for('login'))
-
-    dues_record = AdminAddDues.query.filter_by(regno=user.regno).first()
+    try:
+        dues_record = AdminAddDues.query.filter_by(regno=user.regno).first()
+    except Exception as e:
+                print(e)
     if not dues_record:
         flash("You are not eligible to vote. Please ensure your dues are cleared.", "warning")
         return redirect(url_for('dashboard'))
 
     # Prevent multiple votes
-    previous_votes = Vote.query.filter_by(user_id=user.id).first()
+    try:
+        previous_votes = Vote.query.filter_by(user_id=user.id).first()
+    except Exception as e:
+                print(e)
     if previous_votes:
         flash("You have already voted.", "warning")
         return redirect(url_for('results'))
@@ -3064,10 +3128,16 @@ def lecturer_signup():
             return jsonify({'message': 'Invalid email format.'}), 400
 
         # Check if email or staff_id already exists
-        if Lecturer.query.filter_by(email=email).first():
-            return jsonify({'message': 'Email already registered.'}), 400
-        if Lecturer.query.filter_by(staff_id=staff_id).first():
-            return jsonify({'message': 'Staff ID already registered.'}), 400
+        try:
+            if Lecturer.query.filter_by(email=email).first():
+                return jsonify({'message': 'Email already registered.'}), 400
+        except Exception as e:
+                    print(e)
+        try:
+            if Lecturer.query.filter_by(staff_id=staff_id).first():
+                return jsonify({'message': 'Staff ID already registered.'}), 400
+        except Exception as e:
+                    print(e)
 
         # Hash the password
         hashed_password = generate_password_hash(password)
@@ -3159,7 +3229,12 @@ def lecturer_dashboard():
 
 
 
-
+# -------------------------------------------------------------------
 if __name__ == '__main__':
+    # Creates tables if they don't exist. MUST be called inside app context.
     with app.app_context():
-        app.run(debug=True)
+        db.create_all()
+        print("Database tables ensured to exist.")
+
+    # You must have templates named 'signup.html' and 'login.html' for this to run fully.
+    app.run(debug=True)
