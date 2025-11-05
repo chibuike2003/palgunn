@@ -1823,10 +1823,6 @@ def add_dues():
 
     return render_template('admin_adddues.html')
 
-<<<<<<< HEAD
-
-=======
->>>>>>> 1a1109959d9be0cda2b3c0d3f8edc95556636444
 @app.route('/admin_addcandidate', methods=['GET', 'POST'])
 def add_candidate():
     if 'admin_id' not in session:
@@ -1912,11 +1908,8 @@ def add_candidate():
         candidates_by_position[position].append(candidate)
 
     return render_template('admin_addcandidates.html', candidates_by_position=candidates_by_position)
-<<<<<<< HEAD
-=======
 
 
->>>>>>> 1a1109959d9be0cda2b3c0d3f8edc95556636444
 @app.route('/results')
 def results():
     if 'user_id' not in session:
