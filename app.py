@@ -26,7 +26,7 @@ app = Flask(__name__)
 
 # --- Configuration ---
 app.config['SECRET_KEY'] = 'fdtygt5e5re4ere43rt435erdrs34e56fdrde3w22121234567ytgytuih8uijhu87y6fvb' # A strong, unique secret key
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///publicadmindepart.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///pal.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False # Recommended to disable
 app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'static', 'uploads') # Absolute path for file uploads
 
@@ -3229,12 +3229,8 @@ def lecturer_dashboard():
 
 
 
-# -------------------------------------------------------------------
-if __name__ == '__main__':
-    # Creates tables if they don't exist. MUST be called inside app context.
-    with app.app_context():
-        db.create_all()
-        print("Database tables ensured to exist.")
+with app.app_context():
+    db.create_all()
 
-    # You must have templates named 'signup.html' and 'login.html' for this to run fully.
+if __name__ == '__main__':
     app.run(debug=True)
