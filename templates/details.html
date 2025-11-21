@@ -6,10 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
         body {
-            background: #f8f9fa;
-            font-family: 'Inter', sans-serif; /* Changed to Inter for consistency */
+            background: #f8f F;
+            font-family: 'Inter', sans-serif;
         }
 
         .dashboard-header {
@@ -34,6 +35,11 @@
         .card-style {
             transition: transform 0.2s ease;
             cursor: pointer;
+            height: 100%; /* Ensure uniform height */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
 
         .card-style:hover {
@@ -50,13 +56,18 @@
             border-top-left-radius: 15px;
             border-top-right-radius: 15px;
         }
+        
+        /* Make close button work with dark header */
+        .modal-header .btn-close {
+            filter: invert(1) grayscale(100%) brightness(200%);
+        }
 
         .table-striped > tbody > tr:nth-of-type(odd) {
             background-color: #f2f7ff;
         }
-        /* Style for new card to make it fit */
+        
         .card-container {
-            margin-bottom: 2rem; /* Spacing between rows of cards */
+            margin-bottom: 2rem;
         }
     </style>
 </head>
@@ -67,48 +78,54 @@
     <p class="lead">Manage candidates, users, and results efficiently</p>
 </div>
 
-<div class="container card-container"> {# Added card-container for potential spacing #}
+<div class="container card-container">
     <div class="row text-center g-4">
-
-        <div class="col-md-4">
+        {# Row 1: Users, Voters, Dues Payers #}
+        <div class="col-md-3">
             <div class="card card-style shadow-sm p-4" data-bs-toggle="modal" data-bs-target="#modalOne">
                 <h5 class="text-primary fw-bold">Users On The Platform</h5>
-                <p class="text-muted">List of all registered Users</p>
+                <p class="text-muted">List of all registered Students</p>
+                <h2 class="display-5 text-primary">{% if users %}{{ users|length }}{% else %}0{% endif %}</h2>
             </div>
         </div>
 
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="card card-style shadow-sm p-4" data-bs-toggle="modal" data-bs-target="#modalTwo">
                 <h5 class="text-primary fw-bold">People That Voted</h5>
                 <p class="text-muted">Voters that Exercised Their Franchise</p>
+                <h2 class="display-5 text-primary">{% if voters %}{{ voters|length }}{% else %}0{% endif %}</h2>
             </div>
         </div>
 
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="card card-style shadow-sm p-4" data-bs-toggle="modal" data-bs-target="#modalThree">
-                <h5 class="text-primary fw-bold">People That Have Paid Departmental Dues Results</h5>
+                <h5 class="text-primary fw-bold">Dues Payers</h5>
                 <p class="text-muted">Departmental Dues History</p>
+                <h2 class="display-5 text-primary">{% if dues_payers %}{{ dues_payers|length }}{% else %}0{% endif %}</h2>
             </div>
         </div>
-
-        {# NEW CARD FOR LECTURERS #}
-        <div class="col-md-4 mx-auto"> {# Using mx-auto to center if it's the only one in its row #}
+        
+        {# Lecturer Card #}
+        <div class="col-md-3">
             <div class="card card-style shadow-sm p-4" data-bs-toggle="modal" data-bs-target="#modalLecturers">
                 <h5 class="text-primary fw-bold">Registered Lecturers</h5>
                 <p class="text-muted">View all lecturers who created an account</p>
+                <h2 class="display-5 text-primary">{% if lecturers %}{{ lecturers|length }}{% else %}0{% endif %}</h2>
             </div>
         </div>
-        {# END NEW CARD #}
+        {# End Lecturer Card #}
 
     </div>
 </div>
 
 <div class="container py-5">
     <div class="row g-4">
-        <hr>
-        <h2 class="mt-5 mb-3">Manage Users</h2>
+        <hr class="mt-0">
+        
+        {# --- 1. Manage Users (Students) --- #}
+        <h2 class="mt-5 mb-3">Manage Users (Students)</h2>
         <div class="col-12">
-            <div class="card dashboard-card p-4">
+            <div class="card dashboard-card p-4 shadow">
                 <div class="card-body">
                     <h5 class="card-title">All Registered Users (Students)</h5>
                     <div class="table-responsive">
@@ -128,7 +145,7 @@
                                     <td>{{ user.id }}</td>
                                     <td>{{ user.username }}</td>
                                     <td>{{ user.email }}</td>
-                                    <td>{{ user.fullname }}</td> {# Assuming User model has a 'fullname' attribute #}
+                                    <td>{{ user.fullname }}</td> 
                                     <td>
                                         <a href="{{ url_for('admin_edit_user', user_id=user.id) }}" class="btn btn-warning btn-sm me-2">
                                             <i class="bi bi-pencil"></i> Edit
@@ -152,9 +169,12 @@
             </div>
         </div>
 
+        <hr>
+
+        {# --- 2. Manage Lecturers --- #}
         <h2 class="mt-5 mb-3">Manage Lecturers</h2>
         <div class="col-12">
-            <div class="card dashboard-card p-4">
+            <div class="card dashboard-card p-4 shadow">
                 <div class="card-body">
                     <h5 class="card-title">All Registered Lecturers</h5>
                     <div class="table-responsive">
@@ -164,7 +184,7 @@
                                     <th>ID</th>
                                     <th>Full Name</th>
                                     <th>Email</th>
-                                    <th>Staff ID</th> {# Assuming Lecturer model has 'staff_id' #}
+                                    <th>Staff ID</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -172,9 +192,9 @@
                                 {% for lecturer in lecturers %}
                                 <tr>
                                     <td>{{ lecturer.id }}</td>
-                                    <td>{{ lecturer.fullname }}</td> {# Assuming Lecturer model has a 'fullname' attribute #}
+                                    <td>{{ lecturer.fullname }}</td> 
                                     <td>{{ lecturer.email }}</td>
-                                    <td>{{ lecturer.staff_id }}</td> {# Placeholder, adjust to your Lecturer model's attributes #}
+                                    <td>{{ lecturer.staff_id }}</td> 
                                     <td>
                                         <a href="{{ url_for('admin_edit_lecturer', lecturer_id=lecturer.id) }}" class="btn btn-warning btn-sm me-2">
                                             <i class="bi bi-pencil"></i> Edit
@@ -197,10 +217,13 @@
                 </div>
             </div>
         </div>
+        
+        <hr>
 
+        {# --- 3. Manage Voters (Read-only) --- #}
         <h2 class="mt-5 mb-3">Manage Voters</h2>
         <div class="col-12">
-            <div class="card dashboard-card p-4">
+            <div class="card dashboard-card p-4 shadow">
                 <div class="card-body">
                     <h5 class="card-title">Users Who Have Voted</h5>
                     <div class="table-responsive">
@@ -211,7 +234,7 @@
                                     <th>Username</th>
                                     <th>Email</th>
                                     <th>Full Name</th>
-                                    <th>Actions</th> {# You might not want direct edit/delete for voters in this context, but if you do, add routes #}
+                                    <th>Status</th> 
                                 </tr>
                             </thead>
                             <tbody>
@@ -222,7 +245,7 @@
                                     <td>{{ voter.email }}</td>
                                     <td>{{ voter.fullname }}</td>
                                     <td>
-                                        <span class="text-muted">Managed via User Edit</span>
+                                        <span class="badge bg-success">Voted</span>
                                     </td>
                                 </tr>
                                 {% else %}
@@ -236,10 +259,13 @@
                 </div>
             </div>
         </div>
+        
+        <hr>
 
+        {# --- 4. Manage Dues Payers (Read-only) --- #}
         <h2 class="mt-5 mb-3">Manage Dues Payers</h2>
         <div class="col-12">
-            <div class="card dashboard-card p-4">
+            <div class="card dashboard-card p-4 shadow">
                 <div class="card-body">
                     <h5 class="card-title">Users Who Have Paid Dues</h5>
                     <div class="table-responsive">
@@ -250,7 +276,7 @@
                                     <th>Username</th>
                                     <th>Email</th>
                                     <th>Full Name</th>
-                                    <th>Actions</th>
+                                    <th>Status</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -261,7 +287,7 @@
                                     <td>{{ dues_payer.email }}</td>
                                     <td>{{ dues_payer.fullname }}</td>
                                     <td>
-                                        <span class="text-muted">Managed via User Edit</span>
+                                        <span class="badge bg-info text-dark">Paid Dues</span>
                                     </td>
                                 </tr>
                                 {% else %}
@@ -275,10 +301,13 @@
                 </div>
             </div>
         </div>
+        
+        <hr>
 
+        {# --- 5. Manage Electoral Candidates (FIXED ERROR) --- #}
         <h2 class="mt-5 mb-3">Manage Electoral Candidates</h2>
         <div class="col-12">
-            <div class="card dashboard-card p-4">
+            <div class="card dashboard-card p-4 shadow">
                 <div class="card-body">
                     <h5 class="card-title">Electoral Candidates</h5>
                     <div class="table-responsive">
@@ -295,13 +324,16 @@
                                 {% for candidate in candidates %}
                                 <tr>
                                     <td>{{ candidate.id }}</td>
-                                    <td>{{ candidate.user.fullname }}</td> {# Assuming candidate has a relationship to User #}
-                                    <td>{{ candidate.position }}</td> {# Assuming candidate has a 'position' attribute #}
+                                    {# FIXED: Changed from candidate.user.fullname to candidate.fullname to prevent UndefinedError #}
+                                    <td>{{ candidate.fullname }}</td> 
+                                    <td>{{ candidate.position }}</td> 
                                     <td>
-                                        <a href="{{ url_for('admin_edit_candidate', candidate_id=candidate.id) }}" class="btn btn-warning btn-sm me-2">
+                                        {# FIXED: Changed endpoint from 'admin_edit_candidate' to 'edit_candidate' #}
+                                        <a href="{{ url_for('edit_candidate', candidate_id=candidate.id) }}" class="btn btn-warning btn-sm me-2">
                                             <i class="bi bi-pencil"></i> Edit
                                         </a>
-                                        <form action="{{ url_for('admin_delete_candidate', candidate_id=candidate.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this candidate?');">
+                                        {# FIXED: Changed endpoint from 'admin_delete_candidate' to 'delete_candidate' #}
+                                        <form action="{{ url_for('delete_candidate', candidate_id=candidate.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this candidate?');">
                                             <button type="submit" class="btn btn-danger btn-sm">
                                                 <i class="bi bi-trash"></i> Delete
                                             </button>
@@ -322,17 +354,22 @@
 
     </div>
 </div>
-{# Modals start here #}
 
+{# ========================================== #}
+{# Modals start here #}
+{# ========================================== #}
+
+{# Modal 1: Registered Users #}
 <div class="modal fade" id="modalOne" tabindex="-1" aria-labelledby="modalOneLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="modalOneLabel">🧑‍💼 Registered Users</h5>
-          <button type="button" class="btn-close bg-light" data-bs-dismiss="modal" aria-label="Close"></button>
+          <h5 class="modal-title" id="modalOneLabel">🧑‍💼 Registered Users (Students)</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-            {% if users %} {# Check if 'users' variable exists and is not empty #}
+            {% if users %}
+          <div class="table-responsive">
           <table class="table table-striped modal-table">
             <thead>
               <tr>
@@ -347,12 +384,13 @@
                 <tr>
                   <td>{{ user.fullname if user.fullname else 'N/A' }}</td>
                   <td>{{ user.email }}</td>
-                  <td>{{ user.regno if user.regno else 'N/A' }}</td> {# Assuming 'regno' might be an attribute of User #}
-                  <td>{{ user.phone if user.phone else 'N/A' }}</td> {# Assuming 'phone' might be an attribute of User #}
+                  <td>{{ user.regno if user.regno else 'N/A' }}</td>
+                  <td>{{ user.phone if user.phone else 'N/A' }}</td> 
                 </tr>
               {% endfor %}
             </tbody>
           </table>
+          </div>
             {% else %}
             <p class="text-muted text-center">No registered users found.</p>
             {% endif %}
@@ -361,15 +399,17 @@
     </div>
 </div>
 
+{# Modal 2: Voters #}
 <div class="modal fade" id="modalTwo" tabindex="-1" aria-labelledby="modalTwoLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="modalTwoLabel">🗳️ Voters</h5>
-          <button type="button" class="btn-close bg-light" data-bs-dismiss="modal" aria-label="Close"></button>
+          <h5 class="modal-title" id="modalTwoLabel">🗳️ Users Who Voted</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
             {% if voters %}
+          <div class="table-responsive">
           <table class="table table-striped modal-table">
             <thead>
               <tr>
@@ -383,11 +423,12 @@
                 <tr>
                   <td>{{ voter.fullname if voter.fullname else 'N/A' }}</td>
                   <td>{{ voter.email }}</td>
-                  <td>{{ voter.regno if voter.regno else 'N/A' }}</td> {# Assuming 'regno' might be an attribute of Voter #}
+                  <td>{{ voter.regno if voter.regno else 'N/A' }}</td> 
                 </tr>
               {% endfor %}
             </tbody>
           </table>
+          </div>
             {% else %}
             <p class="text-muted text-center">No voters found.</p>
             {% endif %}
@@ -396,15 +437,17 @@
     </div>
 </div>
 
+{# Modal 3: Dues Payers #}
 <div class="modal fade" id="modalThree" tabindex="-1" aria-labelledby="modalThreeLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="modalThreeLabel">💰 Departmental Dues Payers</h5>
-          <button type="button" class="btn-close bg-light" data-bs-dismiss="modal" aria-label="Close"></button>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
             {% if dues_payers %}
+          <div class="table-responsive">
           <table class="table table-striped modal-table">
             <thead>
               <tr>
@@ -416,17 +459,18 @@
             </thead>
             <tbody>
               {% for user in dues_payers %}
-                {% for record in user.adminadddues %} {# This assumes a relationship is set up #}
+                {# Assuming the first dues record is sufficient for this modal #}
+                {% set record = user.adminadddues|first if user.adminadddues is iterable %}
                 <tr>
                   <td>{{ user.fullname if user.fullname else 'N/A' }}</td>
-                  <td>{{ record.regno if record.regno else 'N/A' }}</td> {# Assuming 'regno' is on AdminAddDues record #}
-                  <td>{{ record.sessions_paid if record.sessions_paid else 'N/A' }}</td>
-                  <td>{{ record.date_filled.strftime("%Y-%m-%d") if record.date_filled else 'N/A' }}</td>
+                  <td>{{ user.regno if user.regno else 'N/A' }}</td> 
+                  <td>{{ record.sessions_paid if record and record.sessions_paid else 'N/A' }}</td>
+                  <td>{{ record.date_filled.strftime("%Y-%m-%d") if record and record.date_filled else 'N/A' }}</td>
                 </tr>
-                {% endfor %}
               {% endfor %}
             </tbody>
           </table>
+          </div>
             {% else %}
             <p class="text-muted text-center">No departmental dues payers found.</p>
             {% endif %}
@@ -435,17 +479,17 @@
     </div>
 </div>
 
-{# NEW MODAL FOR LECTURERS #}
+{# Modal: Registered Lecturers (NEW) #}
 <div class="modal fade" id="modalLecturers" tabindex="-1" aria-labelledby="modalLecturersLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-scrollable"> {# Changed to modal-xl for more columns #}
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="modalLecturersLabel">👩‍🏫 Registered Lecturers</h5>
-                <button type="button" class="btn-close bg-light" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                {% if lecturers %} {# Check if 'lecturers' variable exists and is not empty #}
-                <div class="table-responsive"> {# Added table-responsive for better overflow handling #}
+                {% if lecturers %}
+                <div class="table-responsive">
                     <table class="table table-striped modal-table">
                         <thead>
                             <tr>
@@ -454,26 +498,24 @@
                                 <th>Email</th>
                                 <th>Staff ID</th>
                                 <th>Department</th>
-                                <th>Phone Number</th>
+                                <th>Phone</th>
                                 <th>State of Origin</th>
                                 <th>LGA</th>
                                 <th>Home Address</th>
-                                {# Uncomment if you plan to display profile pictures #}
                             </tr>
                         </thead>
                         <tbody>
                             {% for lecturer in lecturers %}
                             <tr>
                                 <td>{{ lecturer.id }}</td>
-                                <td>{{ lecturer.full_name }}</td>
+                                <td>{{ lecturer.fullname }}</td> {# Assuming 'fullname' attribute #}
                                 <td>{{ lecturer.email }}</td>
                                 <td>{{ lecturer.staff_id }}</td>
-                                <td>{{ lecturer.department }}</td>
+                                <td>{{ lecturer.department if lecturer.department else 'N/A' }}</td>
                                 <td>{{ lecturer.phone_number if lecturer.phone_number else 'N/A' }}</td>
                                 <td>{{ lecturer.state_of_origin if lecturer.state_of_origin else 'N/A' }}</td>
                                 <td>{{ lecturer.lga if lecturer.lga else 'N/A' }}</td>
                                 <td>{{ lecturer.home_address if lecturer.home_address else 'N/A' }}</td>
-                                {# Uncomment if you plan to display profile pictures #}
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -486,11 +528,12 @@
         </div>
     </div>
 </div>
-{# END NEW MODAL #}
 
 {# Admin Logout Button #}
-<div class="container text-center mt-5">
-    <a href="{{ url_for('admin_logout') }}" class="btn btn-danger">Admin Logout</a> {# Assuming you have an admin_logout route #}
+<div class="container text-center mt-5 mb-5">
+    <a href="{{ url_for('admin_logout') }}" class="btn btn-danger btn-lg shadow">
+        <i class="bi bi-box-arrow-right"></i> Admin Logout
+    </a>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
