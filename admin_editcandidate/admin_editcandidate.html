@@ -1,0 +1,132 @@
+<!-- 
+    This template provides the UI for editing an existing electoral candidate.
+    It ensures the form is pre-filled with existing data and supports file uploads
+    to change the profile picture.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Candidate</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for visual appeal */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7f9fb;
+        }
+        .form-card {
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 5px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+    </style>
+</head>
+<body class="min-h-screen p-4 sm:p-8">
+
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6 border-b pb-2">Edit Candidate: {{ candidate.fullname }}</h1>
+
+        <!-- Display Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul class="mb-4">
+                    {% for category, message in messages %}
+                        <li class="p-3 mb-2 rounded-lg text-sm {% if category == 'success' %}bg-green-100 text-green-700{% elif category == 'danger' %}bg-red-100 text-red-700{% else %}bg-yellow-100 text-yellow-700{% endif %}">
+                            {{ message }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+
+        <div class="bg-white p-6 sm:p-8 rounded-xl form-card">
+            
+            <!-- 
+                The form action needs to point to the route that handles the update.
+                Assuming a route like /admin_editcandidate/<int:candidate_id> is used.
+                Replace 'edit_candidate' and 'candidate.id' with your actual route name and primary key field if different.
+            -->
+            <form method="POST" enctype="multipart/form-data" action="{{ url_for('edit_candidate', candidate_id=candidate.id) }}">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    
+                    <!-- Full Name -->
+                    <div>
+                        <label for="fullname" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                        <input type="text" id="fullname" name="fullname" required 
+                               value="{{ candidate.fullname }}"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-150">
+                    </div>
+                    
+                    <!-- Registration Number (Regno) - Typically kept read-only -->
+                    <div>
+                        <label for="regno" class="block text-sm font-medium text-gray-700 mb-1">Registration Number</label>
+                        <input type="text" id="regno" name="regno" required readonly
+                               value="{{ candidate.regno }}"
+                               class="w-full px-4 py-2 border border-gray-300 bg-gray-100 rounded-lg focus:ring-blue-500 focus:border-blue-500 cursor-not-allowed">
+                        <p class="text-xs text-gray-500 mt-1">Reg. No. is usually not editable.</p>
+                    </div>
+
+                    <!-- Position -->
+                    <div class="md:col-span-2">
+                        <label for="position" class="block text-sm font-medium text-gray-700 mb-1">Position</label>
+                        <!-- Assuming you might have a list of available positions to select -->
+                        <input type="text" id="position" name="position" required
+                               value="{{ candidate.position }}"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-150">
+                        <!-- If you use a <select>, ensure it has the appropriate 'selected' option based on candidate.position -->
+                    </div>
+
+                    <!-- Profile Picture Management -->
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Profile Picture</label>
+                        
+                        <div class="flex items-center space-x-4">
+                            <!-- Current Image Display -->
+                            <div class="shrink-0">
+                                {% if candidate.profile_pic %}
+                                    <img class="h-20 w-20 object-cover rounded-full border-2 border-gray-200" 
+                                         src="{{ url_for('static', filename='uploads/' + candidate.profile_pic) }}" 
+                                         alt="{{ candidate.fullname }} Profile"
+                                         onerror="this.onerror=null;this.src='https://placehold.co/80x80/cccccc/333333?text=No+Img';">
+                                {% else %}
+                                    <span class="inline-block h-20 w-20 rounded-full overflow-hidden bg-gray-100">
+                                        <svg class="h-full w-full text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M24 20.993c-.432 1.34-1.83 2.07-3.2 1.78-2.17-.46-5.8-.81-7.79-1.28-1.53.94-3.53 1.5-5.61 1.5-3.07 0-5.78-1.35-7.79-2.28-1.46-.68-2.61-1.74-3.2-3.24-.432-1.34-.332-2.8 0-4.14 1.46-4.57 6.1-7.85 10.9-7.85 4.81 0 9.44 3.28 10.9 7.85.432 1.34.532 2.8 0 4.14zM12 4a4 4 0 100 8 4 4 0 000-8z"/>
+                                        </svg>
+                                    </span>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- File Input for Change -->
+                            <label class="block">
+                                <span class="sr-only">Choose profile photo</span>
+                                <input type="file" id="profile_pic" name="profile_pic" accept="image/*"
+                                       class="block w-full text-sm text-gray-500
+                                              file:mr-4 file:py-2 file:px-4
+                                              file:rounded-full file:border-0
+                                              file:text-sm file:font-semibold
+                                              file:bg-blue-50 file:text-blue-700
+                                              hover:file:bg-blue-100"
+                                />
+                            </label>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-2">Leave blank to keep the current image.</p>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="mt-8 flex justify-end space-x-4">
+                    <a href="{{ url_for('add_candidate') }}" class="px-5 py-2 text-sm font-semibold rounded-lg text-gray-600 bg-gray-200 hover:bg-gray-300 transition duration-150">
+                        Cancel
+                    </a>
+                    <button type="submit" class="px-5 py-2 text-sm font-semibold rounded-lg text-white bg-green-600 hover:bg-green-700 transition duration-150">
+                        Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
