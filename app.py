@@ -26,7 +26,7 @@ app = Flask(__name__)
 
 # --- Configuration ---
 app.config['SECRET_KEY'] = 'fdtygt5e5re4ere43rt435erdrs34e56fdrde3w22121234567ytgytuih8uijhu87y6fvb' # A strong, unique secret key
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///pal.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///o.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False # Recommended to disable
 app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'static', 'uploads') # Absolute path for file uploads
 
@@ -74,6 +74,7 @@ def load_user(user_id):
 
 
 
+
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     fullname = db.Column(db.String(100), nullable=False)
@@ -84,10 +85,12 @@ class User(db.Model):
     password = db.Column(db.String(200), nullable=False)
     public_key = db.Column(db.Text, nullable=True)
 
-    # Define relationships for messages (assuming Message and ProjectIdea models exist)
+    # Define relationships for messages using back_populates
     sent_messages = db.relationship('Message', foreign_keys='Message.sender_id', back_populates='sender', lazy=True)
     received_messages = db.relationship('Message', foreign_keys='Message.recipient_id', back_populates='recipient', lazy=True)
-    project_ideas = db.relationship('ProjectIdea', backref='author', lazy=True) 
+    # The fix is on the line above: back_populates instead of back_popates
+
+    project_ideas = db.relationship('ProjectIdea', backref='author', lazy=True) # Assuming ProjectIdea model exists
 
     def __repr__(self):
         return f"User('{self.fullname}', '{self.email}')"
@@ -104,14 +107,28 @@ class User(db.Model):
 
     def get_id(self):
         return str(self.id)
+
 # Your ElectoralCandidate class would then be defined as discussed in the previous response,
 # linking to the User model correctly.
+
 class ElectoralCandidate(db.Model):
+    # This ensures the table name matches the entity name in your error
+    __tablename__ = 'electoral_candidate' 
+
     id = db.Column(db.Integer, primary_key=True)
-    position = db.Column(db.String(50), nullable=False)
-    profile_pic = db.Column(db.String(200), nullable=False)  # path to image
-    # You might consider storing the profile_pic on the User model
-    # and referencing it if the candidate's pic is the same as their user pic.
+    fullname = db.Column(db.String(100), nullable=False)
+    
+    # 🚨 CRITICAL FIX: Ensure 'regno' column is defined.
+    # The error message is specifically looking for this property.
+    regno = db.Column(db.String(50), unique=True, nullable=False) 
+    
+    position = db.Column(db.String(100), nullable=False)
+    profile_pic = db.Column(db.String(255), nullable=False)
+    # The 'vote_count' attribute is calculated dynamically in your route,
+    # so it does not need a column here.
+
+    def __repr__(self):
+        return f"<Candidate {self.fullname} ({self.regno})>"
 
     # 1. Add a Foreign Key to link to the User model
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, unique=True)
@@ -245,15 +262,16 @@ class UserBlog(db.Model):
 # 
 
 
-
 class Vote(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     position = db.Column(db.String(100), nullable=False)
-    candidate_id = db.Column(db.Integer, nullable=True)  # can be null for 'NO' votes
-    decision = db.Column(db.String(10))  # 'yes', 'no' or 'selected'
-
+    candidate_id = db.Column(db.Integer, nullable=True)
+    decision = db.Column(db.String(10))
     user = db.relationship('User', backref='votes')
+
+
+
 
 class Admin(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -448,7 +466,7 @@ def load_user(user_id):
     return user
 # -----------------
 #home
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/home', methods=['GET', 'POST'])
 def index():
         return render_template('index.html',)
 
@@ -463,9 +481,9 @@ def helpcontact():
     return render_template('helpcontact.html')
 
 
-# -------------------------------------------------------------------
-# 2. Signup Route
-# -------------------------------------------------------------------
+# Signup Route
+# -----------------
+
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
@@ -480,18 +498,8 @@ def signup():
             flash('Passwords do not match.', 'danger')
             return redirect(url_for('signup'))
 
-        # Initialize variable to prevent UnboundLocalError on database failure
-        existing_user = None 
-        
         # Check for existing email or reg number
-        try:
-            existing_user = User.query.filter((User.email == email) | (User.regno == regno)).first()
-        except Exception as e:
-            # This is where the error jumps if the 'user' table is missing!
-            print(f"Database Error during signup query: {e}")
-            flash('A server error occurred during registration. Please try again.', 'danger')
-            return redirect(url_for('signup'))
-            
+        existing_user = User.query.filter((User.email == email) | (User.regno == regno)).first()
         if existing_user:
             flash('Email or Registration Number already exists, please log in', 'danger')
             return redirect(url_for('login'))
@@ -499,88 +507,62 @@ def signup():
         # Create new user
         hashed_password = generate_password_hash(password)
         new_user = User(fullname=fullname, email=email, regno=regno, phone=phone, password=hashed_password)
-        
-        # Save new user to database
-        try:
-            db.session.add(new_user)
-            db.session.commit()
-        except Exception as e:
-            db.session.rollback()
-            print(f"Database Error during user save: {e}")
-            flash('Failed to create account due to a database error.', 'danger')
-            return redirect(url_for('signup'))
+        db.session.add(new_user)
+        db.session.commit()
 
-        # Send Welcome Email (commented out)
-        # send_welcome_email(email, fullname)
+        # Send Welcome Email
+        send_welcome_email(email, fullname)
 
         flash('Account created successfully! Please log in.', 'success')
         return redirect(url_for('login'))
 
-    # Placeholder for a missing template if not using render_template
-    # return "Signup Form Here" 
     return render_template('signup.html')
 
 
-# -------------------------------------------------------------------
-# 3. Login Route
-# -------------------------------------------------------------------
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        email = request.form['loginEmail']
-        password = request.form['loginPassword']
-        
-        # Initialize user to None to prevent UnboundLocalError on database failure
-        user = None 
-        
-        try:
-            # Query the database for the user
-            user = User.query.filter_by(email=email).first()
-        except Exception as e:
-            # This is where the error jumps if the 'user' table is missing!
-            print(f"Database Error during login query: {e}") 
-            flash('A database error occurred during login. Please try again.', 'danger')
-            return redirect(url_for('login'))
-
-        # Check if user exists and password is correct
-        if user and check_password_hash(user.password, password):
-            session['user_id'] = user.id
-            flash('Login successful!', 'success')
-            # Assuming 'dashboard' route exists
-            return redirect(url_for('dashboard'))
-        else:
-            flash('Invalid credentials.', 'danger')
-            return redirect(url_for('login'))
-
-    # Placeholder for a missing template if not using render_template
-    # return "Login Form Here"
-    return render_template('login.html')
 # -----------------
 # Welcome Email Function
 # -----------------
-# def send_welcome_email(to_email, fullname):
-#     msg = EmailMessage()
-#     msg['Subject'] = 'Welcome to Department Of Public Administration, University Of Nigeria, Nsukka Platform!'
-#     msg['From'] = 'yourgmail@gmail.com'
-#     msg['To'] = to_email
-#     msg.set_content(f"Dear {fullname},\n\nWelcome! Your account has been created successfully.\n\nThank you!")
+def send_welcome_email(to_email, fullname):
+    msg = EmailMessage()
+    msg['Subject'] = 'Welcome to Department Of Public Administration, University Of Nigeria, Nsukka Platform!'
+    msg['From'] = 'yourgmail@gmail.com'
+    msg['To'] = to_email
+    msg.set_content(f"Dear {fullname},\n\nWelcome! Your account has been created successfully.\n\nThank you!")
 
-#     # Replace with your actual Gmail credentials
-#     gmail_user = 'yourgmail@gmail.com'
-#     gmail_password = 'your_app_password'  # App Password if 2FA is enabled
+    # Replace with your actual Gmail credentials
+    gmail_user = 'yourgmail@gmail.com'
+    gmail_password = 'your_app_password'  # App Password if 2FA is enabled
 
-#     try:
-#         with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
-#             smtp.login(gmail_user, gmail_password)
-#             smtp.send_message(msg)
-#     except Exception as e:
-#         print("Email failed:", e)
+    try:
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
+            smtp.login(gmail_user, gmail_password)
+            smtp.send_message(msg)
+    except Exception as e:
+        print("Email failed:", e)
 
 @app.route('/logout')
 def logout():
     session.clear()
     flash('Logged out successfully.', 'info')
     return redirect(url_for('login'))
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        email = request.form['loginEmail']
+        password = request.form['loginPassword']
+        user = User.query.filter_by(email=email).first()
+
+        if user and check_password_hash(user.password, password):
+            session['user_id'] = user.id
+            flash('Login successful!', 'success')
+            return redirect(url_for('dashboard'))
+        else:
+            flash('Invalid credentials.', 'danger')
+            return redirect(url_for('login'))
+
+    return render_template('login.html')
+
 
 @app.route('/dashboard')
 def dashboard():
@@ -616,20 +598,14 @@ def friendrequest():
 
         if action == 'send':
             # Check if request already exists
-            try:
-                existing_request = FriendRequest.query.filter_by(sender_id=user.id, receiver_id=receiver_id).first()
-            except Exception as e:
-                        print(e)
+            existing_request = FriendRequest.query.filter_by(sender_id=user.id, receiver_id=receiver_id).first()
             if not existing_request:
                 new_request = FriendRequest(sender_id=user.id, receiver_id=receiver_id, status='pending')
                 db.session.add(new_request)
                 db.session.commit()
                 flash('Friend request sent successfully!', 'success')
         elif action == 'cancel':
-            try:
-                existing_request = FriendRequest.query.filter_by(sender_id=user.id, receiver_id=receiver_id).first()
-            except Exception as e:
-                        print(e)
+            existing_request = FriendRequest.query.filter_by(sender_id=user.id, receiver_id=receiver_id).first()
             if existing_request:
                 db.session.delete(existing_request)
                 db.session.commit()
@@ -692,38 +668,38 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-# @app.route('/create_community', methods=['GET', 'POST'])
-# def create_community():
-#     if request.method == 'POST':
-#         community_name = request.form['community_name']
-#         description = request.form['description']
-#         profile_picture = request.files['profile_picture']  # this is a FileStorage object
+@app.route('/create_community', methods=['GET', 'POST'])
+def create_community():
+    if request.method == 'POST':
+        community_name = request.form['community_name']
+        description = request.form['description']
+        profile_picture = request.files['profile_picture']  # this is a FileStorage object
 
-#         if profile_picture:
-#             filename = secure_filename(profile_picture.filename)
-#             filepath = os.path.join('static/uploads', filename)  # choose your upload folder
-#             profile_picture.save(filepath)  # save the file
+        if profile_picture:
+            filename = secure_filename(profile_picture.filename)
+            filepath = os.path.join('static/uploads', filename)  # choose your upload folder
+            profile_picture.save(filepath)  # save the file
 
-#             # Now save only the filename (or filepath) to the database
-#             new_community = Community(
-#                 name=community_name,
-#                 description=description,
-#                 profile_picture=filename,  # or 'filepath' if you want full path
-#                 admin_id=session['user_id'],
-#                 created_at=datetime.now()
-#             )
-#             db.session.add(new_community)
-#             db.session.commit()
+            # Now save only the filename (or filepath) to the database
+            new_community = Community(
+                name=community_name,
+                description=description,
+                profile_picture=filename,  # or 'filepath' if you want full path
+                admin_id=session['user_id'],
+                created_at=datetime.now()
+            )
+            db.session.add(new_community)
+            db.session.commit()
 
-#             flash('Community created successfully!', 'success')
-#             return redirect(url_for('community_page'))
+            flash('Community created successfully!', 'success')
+            return redirect(url_for('community_page'))
 
-#     return render_template('createcommunity.html')
+    return render_template('createcommunity.html')
 
-# @app.route('/community.html')
-# def community_page():
-#     communities = Community.query.all()
-#     return render_template('communities.html', communities=communities)
+@app.route('/community.html')
+def community_page():
+    communities = Community.query.all()
+    return render_template('communities.html', communities=communities)
 
 
 @app.route('/report-issue', methods=['GET', 'POST'])
@@ -861,118 +837,118 @@ def contact():
 
 
 
-# @app.route('/chatwithfriends')
-# def privatechat():
-#     if 'user_id' not in session:
-#         flash('Please log in to access chat.', 'danger')
-#         return redirect(url_for('login'))
+@app.route('/chatwithfriends')
+def privatechat():
+    if 'user_id' not in session:
+        flash('Please log in to access chat.', 'danger')
+        return redirect(url_for('login'))
 
-#     user = User.query.get(session['user_id'])
-#     friend_id = request.args.get('friend_id')
+    user = User.query.get(session['user_id'])
+    friend_id = request.args.get('friend_id')
 
-#     if not friend_id:
-#         flash('No friend selected to chat with.', 'warning')
-#         return redirect(url_for('friendrequest')) # Redirect to friends list or similar
+    if not friend_id:
+        flash('No friend selected to chat with.', 'warning')
+        return redirect(url_for('friendrequest')) # Redirect to friends list or similar
 
-#     friend = User.query.get(friend_id)
+    friend = User.query.get(friend_id)
 
-#     if not friend:
-#         flash('Friend not found.', 'danger')
-#         return redirect(url_for('friendrequest')) # Redirect if friend doesn't exist
+    if not friend:
+        flash('Friend not found.', 'danger')
+        return redirect(url_for('friendrequest')) # Redirect if friend doesn't exist
 
-#     # Fetch existing messages for this chat (optional, but good for persistence)
-#     # This example assumes a Message model with sender_id, recipient_id, encrypted_content
-#     # You might need to adjust this based on your actual Message model structure
-#     messages = Message.query.filter(
-#         ((Message.sender_id == user.id) & (Message.recipient_id == friend.id)) |
-#         ((Message.sender_id == friend.id) & (Message.recipient_id == user.id))
-#     ).order_by(Message.timestamp.asc()).all()
+    # Fetch existing messages for this chat (optional, but good for persistence)
+    # This example assumes a Message model with sender_id, recipient_id, encrypted_content
+    # You might need to adjust this based on your actual Message model structure
+    messages = Message.query.filter(
+        ((Message.sender_id == user.id) & (Message.recipient_id == friend.id)) |
+        ((Message.sender_id == friend.id) & (Message.recipient_id == user.id))
+    ).order_by(Message.timestamp.asc()).all()
 
-#     # Pass all necessary data to the template
-#     return render_template('chat.html',
-#                            user=user,
-#                            friend=friend, # Pass the entire friend object
-#                            messages=messages,
-#                            current_user_public_key=user.public_key, # Assuming public_key is stored in User model
-#                            friend_public_key=friend.public_key) # Assuming public_key is stored in User model
+    # Pass all necessary data to the template
+    return render_template('chat.html',
+                           user=user,
+                           friend=friend, # Pass the entire friend object
+                           messages=messages,
+                           current_user_public_key=user.public_key, # Assuming public_key is stored in User model
+                           friend_public_key=friend.public_key) # Assuming public_key is stored in User model
 
 # --- SocketIO Events ---
 
-# def handle_connect():
-#     user_id = session.get('user_id')
-#     if user_id:
-#         join_room(str(user_id))
-#         print(f"User {user_id} connected via SocketIO.")
-#     else:
-#         print("Unauthenticated user tried to connect to SocketIO.")
-#         return False
+def handle_connect():
+    user_id = session.get('user_id')
+    if user_id:
+        join_room(str(user_id))
+        print(f"User {user_id} connected via SocketIO.")
+    else:
+        print("Unauthenticated user tried to connect to SocketIO.")
+        return False
 
-# def handle_disconnect():
-#     user_id = session.get('user_id')
-#     if user_id:
-#         leave_room(str(user_id))
-#         print(f"User {user_id} disconnected.")
+def handle_disconnect():
+    user_id = session.get('user_id')
+    if user_id:
+        leave_room(str(user_id))
+        print(f"User {user_id} disconnected.")
 
-# def handle_send_encrypted_message(data):
-#     sender_id = session.get('user_id')
-#     recipient_id = data.get('recipient_id')
-#     encrypted_message = data.get('encrypted_message') # This is the object: {ciphertext, nonce}
+def handle_send_encrypted_message(data):
+    sender_id = session.get('user_id')
+    recipient_id = data.get('recipient_id')
+    encrypted_message = data.get('encrypted_message') # This is the object: {ciphertext, nonce}
 
-#     if not sender_id or not recipient_id or not encrypted_message:
-#         print("Invalid encrypted message data received.")
-#         return
+    if not sender_id or not recipient_id or not encrypted_message:
+        print("Invalid encrypted message data received.")
+        return
 
-#     # **Store the encrypted message in the database**
-#     # Store the encrypted_message object as a JSON string
-#     new_message = PrivateChat(
-#         sender_id=sender_id,
-#         recipient_id=recipient_id,
-#         encrypted_content=json.dumps(encrypted_message) # Convert dict to JSON string
-#     )
-#     db.session.add(new_message)
-#     db.session.commit()
-#     print(f"Stored encrypted message from {sender_id} to {recipient_id} in DB.")
+    # **Store the encrypted message in the database**
+    # Store the encrypted_message object as a JSON string
+    new_message = PrivateChat(
+        sender_id=sender_id,
+        recipient_id=recipient_id,
+        encrypted_content=json.dumps(encrypted_message) # Convert dict to JSON string
+    )
+    db.session.add(new_message)
+    db.session.commit()
+    print(f"Stored encrypted message from {sender_id} to {recipient_id} in DB.")
 
-#     # Relay the encrypted message to the recipient's room
-#     # The server does NOT decrypt the message here.
-#     emit('receive_encrypted_message', {
-#         'sender_id': sender_id,
-#         'encrypted_message': encrypted_message
-#     }, room=str(recipient_id))
-#     print(f"Relayed encrypted message from {sender_id} to {recipient_id}")
+    # Relay the encrypted message to the recipient's room
+    # The server does NOT decrypt the message here.
+    emit('receive_encrypted_message', {
+        'sender_id': sender_id,
+        'encrypted_message': encrypted_message
+    }, room=str(recipient_id))
+    print(f"Relayed encrypted message from {sender_id} to {recipient_id}")
 
-# def handle_request_public_key(data):
-#     requester_id = session.get('user_id')
-#     target_user_id = data.get('target_user_id')
+def handle_request_public_key(data):
+    requester_id = session.get('user_id')
+    target_user_id = data.get('target_user_id')
 
-#     if not requester_id or not target_user_id:
-#         print("Invalid public key request.")
-#         return
+    if not requester_id or not target_user_id:
+        print("Invalid public key request.")
+        return
 
-#     target_user = User.query.get(target_user_id)
-#     if target_user and target_user.public_key:
-#         emit('receive_public_key', {
-#             'user_id': target_user_id,
-#             'public_key': target_user.public_key
-#         }, room=str(requester_id))
-#         print(f"Sent public key of {target_user_id} to {requester_id}")
-#     else:
-#         print(f"Public key for user {target_user_id} not found or not generated yet.")
-#         emit('public_key_not_found', {'user_id': target_user_id}, room=str(requester_id))
+    target_user = User.query.get(target_user_id)
+    if target_user and target_user.public_key:
+        emit('receive_public_key', {
+            'user_id': target_user_id,
+            'public_key': target_user.public_key
+        }, room=str(requester_id))
+        print(f"Sent public key of {target_user_id} to {requester_id}")
+    else:
+        print(f"Public key for user {target_user_id} not found or not generated yet.")
+        emit('public_key_not_found', {'user_id': target_user_id}, room=str(requester_id))
 
 
 
-# @app.route('/block-user', methods=['POST'])
-# def block_user():
-#     user_id = request.json['userId']
-#     # Code to block the user goes here
-#     return jsonify({'success': True})
+@app.route('/block-user', methods=['POST'])
+def block_user():
+    user_id = request.json['userId']
+    # Code to block the user goes here
+    return jsonify({'success': True})
 
-# @app.route('/unblock-user', methods=['POST'])
-# def unblock_user():
-#     user_id = request.json['userId']
-#     # Code to unblock the user goes here
-#     return jsonify({'success': True})
+@app.route('/unblock-user', methods=['POST'])
+def unblock_user():
+    user_id = request.json['userId']
+    # Code to unblock the user goes here
+    return jsonify({'success': True})
 
 
 @app.route('/payments', methods=['GET', 'POST'])
@@ -999,50 +975,50 @@ def messages():
 
     return render_template('messages.html', user=user, incoming_requests=incoming_requests)
 
-# @app.route('/accept_friend_request/<int:request_id>', methods=['POST'])
-# def accept_friend_request(request_id):
-#     """Accept an incoming friend request."""
-#     friend_request = FriendRequest.query.get_or_404(request_id)
+@app.route('/accept_friend_request/<int:request_id>', methods=['POST'])
+def accept_friend_request(request_id):
+    """Accept an incoming friend request."""
+    friend_request = FriendRequest.query.get_or_404(request_id)
 
-#     # Use session to get the user ID instead of current_user
-#     user_id = session.get('user_id')
+    # Use session to get the user ID instead of current_user
+    user_id = session.get('user_id')
 
-#     if user_id and friend_request.receiver_id == user_id:
-#         # Create a new friendship
-#         new_friendship = Friendship(
-#             user1_id=friend_request.sender_id,
-#             user2_id=friend_request.receiver_id
-#         )
-#         db.session.add(new_friendship)
+    if user_id and friend_request.receiver_id == user_id:
+        # Create a new friendship
+        new_friendship = Friendship(
+            user1_id=friend_request.sender_id,
+            user2_id=friend_request.receiver_id
+        )
+        db.session.add(new_friendship)
 
-#         # Update the friend request status
-#         friend_request.status = 'accepted'
-#         db.session.commit()
+        # Update the friend request status
+        friend_request.status = 'accepted'
+        db.session.commit()
 
-#         flash('Friend request accepted!', 'success')
-#     else:
-#         flash('You cannot accept this request.', 'danger')
+        flash('Friend request accepted!', 'success')
+    else:
+        flash('You cannot accept this request.', 'danger')
 
-#     return redirect(url_for('messages'))
+    return redirect(url_for('messages'))
 
-# @app.route('/decline_friend_request/<int:request_id>', methods=['POST'])
-# def decline_friend_request(request_id):
-#     """Decline an incoming friend request."""
-#     friend_request = FriendRequest.query.get_or_404(request_id)
+@app.route('/decline_friend_request/<int:request_id>', methods=['POST'])
+def decline_friend_request(request_id):
+    """Decline an incoming friend request."""
+    friend_request = FriendRequest.query.get_or_404(request_id)
 
-#     # Use session to get the user ID instead of current_user
-#     user_id = session.get('user_id')
+    # Use session to get the user ID instead of current_user
+    user_id = session.get('user_id')
 
-#     if user_id and friend_request.receiver_id == user_id:
-#         # Update the friend request status to declined
-#         friend_request.status = 'declined'
-#         db.session.commit()
+    if user_id and friend_request.receiver_id == user_id:
+        # Update the friend request status to declined
+        friend_request.status = 'declined'
+        db.session.commit()
 
-#         flash('Friend request declined.', 'info')
-#     else:
-#         flash('You cannot decline this request.', 'danger')
+        flash('Friend request declined.', 'info')
+    else:
+        flash('You cannot decline this request.', 'danger')
 
-#     return redirect(url_for('messages'))
+    return redirect(url_for('messages'))
 
 
 
@@ -1179,12 +1155,9 @@ def browse_projects():
     if not user:
         flash("User not found.", "danger")
         return redirect(url_for('login'))
-    try:
-        dues_record = AdminAddDues.query.filter_by(regno=user.regno).first()
-    except Exception as e:
-                print(e)
+    dues_record = AdminAddDues.query.filter_by(regno=user.regno).first()
     if not dues_record:
-        flash("You are not eligible to search any project. Please ensure your dues are cleared or contact the excos.", "warning")
+        flash("You are not eligible to vote. Please ensure your dues are cleared.", "warning")
         return redirect(url_for('dashboard'))
 
     # Initialize query with all projects
@@ -1468,10 +1441,7 @@ def create_blog_post():
     # currently authenticated user's session (e.g., using Flask-Login: current_user.id).
     # For this demonstration, let's assume a user exists.
     # We will try to find a user by their full name, or create a dummy one if not found.
-    try:
-        user = User.query.filter_by(fullname=author_name).first()
-    except Exception as e:
-                print(e)
+    user = User.query.filter_by(fullname=author_name).first()
     if not user:
         # If user not found, create a dummy user for the purpose of saving the blog.
         # In a real app, users would register and log in.
@@ -1594,10 +1564,7 @@ def update_profile():
         return redirect(url_for('updateprofile'))
 
     # Check if email is already in use by another user (excluding the current user)
-    try:
-        existing_user_with_email = User.query.filter_by(email=new_email).first()
-    except Exception as e:
-                print(e)
+    existing_user_with_email = User.query.filter_by(email=new_email).first()
 
     # Now, 'user' is guaranteed to be a User object from Flask-Login, so user.id will work
     if existing_user_with_email and existing_user_with_email.id != user.id:
@@ -1721,10 +1688,7 @@ def admin_login():
 
         # This is the line you need to make sure is active and correct
         # It assumes you have SQLAlchemy or similar set up where Admin.query is available
-        try:
-            admin = Admin.query.filter_by(username=username).first()
-        except Exception as e:
-            print(e)
+        admin = Admin.query.filter_by(username=username).first()
 
         if admin and admin.check_password(password):
             session['admin_id'] = admin.id
@@ -1744,19 +1708,13 @@ def admin_signup():
         email = request.form['email']
         username = request.form['username']
         password = request.form['password']
-        
-        try:
-            if Admin.query.filter_by(username=username).first():
-                flash('Username already exists!', 'danger')
-                return redirect(url_for('admin_signup'))
-        except Exception as e:
-                    print(e)
-        try:
-            if Admin.query.filter_by(email=email).first():
-                flash('Email already registered!', 'danger')
-                return redirect(url_for('admin_signup'))
-        except Exception as e:
-                    print(e)
+
+        if Admin.query.filter_by(username=username).first():
+            flash('Username already exists!', 'danger')
+            return redirect(url_for('admin_signup'))
+        if Admin.query.filter_by(email=email).first():
+            flash('Email already registered!', 'danger')
+            return redirect(url_for('admin_signup'))
 
         new_admin = Admin(fullname=fullname, email=email, username=username)
         new_admin.set_password(password)
@@ -1876,80 +1834,78 @@ def add_dues():
 
     return render_template('admin_adddues.html')
 
+
+
+
 @app.route('/admin_addcandidate', methods=['GET', 'POST'])
 def add_candidate():
+    # --- Login Check (keep as is) ---
     if 'admin_id' not in session:
         flash("You must be logged in as admin to access this page.", "warning")
         return redirect(url_for('admin_login'))
+    
+    # 🚨 FETCH THE REQUIRED USER ID FROM SESSION
+    admin_id = session.get('admin_id')
 
+    # --- POST Logic for Adding Candidate ---
     if request.method == 'POST':
-        fullname = request.form['fullname']
-        regno = request.form['regno']
-        position = request.form['position']
-        profile_pic = request.files['profile_pic']
+        # Check which form was submitted (Add Candidate)
+        if 'fullname' in request.form: 
+            # ADD CANDIDATE LOGIC (Original code, fixed to use try/except)
+            try:
+                fullname = request.form['fullname']
+                regno = request.form['regno']
+                position = request.form['position']
+                profile_pic = request.files['profile_pic']
 
-        # 1. Find the User associated with the registration number
-        # This is the new crucial step since regno is now on the User model
-        try:
-            user_to_register = User.query.filter_by(regno=regno).first()
-        except Exception as e:
-            print(e)
+                dues_paid = AdminAddDues.query.filter_by(regno=regno).first()
+                if not dues_paid:
+                    flash("Candidate has not paid departmental dues.", "danger")
+                    return redirect(url_for('add_candidate'))
 
+                # Assumes 'regno' is the correct property name after previous fix
+                already_registered = ElectoralCandidate.query.filter_by(regno=regno).first()
+                if already_registered:
+                    flash("Candidate already registered.", "warning")
+                    return redirect(url_for('add_candidate'))
 
-        if not user_to_register:
-            flash(f"User with Registration Number {regno} does not exist.", "danger")
-            return redirect(url_for('add_candidate'))
-
-        # 2. Check Dues using the user's regno (This remains the same if AdminAddDues uses regno)
-        try:
-            dues_paid = AdminAddDues.query.filter_by(regno=regno).first()
-        except Exception as e:
-                    print(e)
-        if not dues_paid:
-            flash("Candidate has not paid departmental dues.", "danger")
-            return redirect(url_for('add_candidate'))
-
-        # 3. Check if the User is already registered as a Candidate
-        #    We now check the ElectoralCandidate table using the user's ID
-        try:
-            already_registered = ElectoralCandidate.query.filter_by(user_id=user_to_register.id).first() 
-        except Exception as e:
-                    print(e)
+                if not profile_pic or profile_pic.filename == '':
+                    flash("Please upload a profile picture.", "danger")
+                    return redirect(url_for('add_candidate'))
                 
-        if already_registered:
-            flash("Candidate already registered for a position.", "warning")
-            return redirect(url_for('add_candidate'))
+                # File save logic
+                filename = secure_filename(profile_pic.filename)
+                upload_folder = os.path.join('static', 'uploads')
+                os.makedirs(upload_folder, exist_ok=True)
+                profile_path = os.path.join(upload_folder, filename)
+                profile_pic.save(profile_path)
 
-        if not profile_pic:
-            flash("Please upload a profile picture.", "danger")
-            return redirect(url_for('add_candidate'))
+                new_candidate = ElectoralCandidate(
+                    fullname=fullname,
+                    regno=regno,
+                    position=position,
+                    profile_pic=filename,
+                    # 🚨 NEW CRITICAL FIX: Pass the required user_id
+                    user_id=admin_id 
+                )
+                db.session.add(new_candidate)
+                db.session.commit()
 
-        # --- File Upload Logic ---
-        filename = secure_filename(profile_pic.filename)
-        upload_folder = os.path.join('static', 'uploads')
-        os.makedirs(upload_folder, exist_ok=True)
-        profile_path = os.path.join(upload_folder, filename)
-        profile_pic.save(profile_path)
-        # --- End File Upload Logic ---
+                flash("Candidate added successfully.", "success")
+                return redirect(url_for('add_candidate'))
+            except Exception as e:
+                db.session.rollback()
+                flash(f"Error adding candidate: {e}", "danger")
+                # Removed the old return redirect here, as it was redundant
+                raise e # Re-raise the exception for debugging or proper logging
 
-        # 4. Create the new candidate using user_id
-        # We no longer save fullname or regno directly on ElectoralCandidate
-        new_candidate = ElectoralCandidate(
-            user_id=user_to_register.id, # Link the candidate profile to the User
-            position=position,
-            profile_pic=filename
-        )
-        db.session.add(new_candidate)
-        db.session.commit()
 
-        flash("Candidate added successfully.", "success")
-        return redirect(url_for('add_candidate'))
+        # The 'election_start' check block remains commented out/removed as per previous fix
 
-    # --- GET request - fetch candidates and their vote counts ---
-    try:
-        all_candidates = ElectoralCandidate.query.all()
-    except Exception as e:
-                print(e)
+    # --- GET Logic for Displaying Candidates and Timing ---
+    
+    # Fetch Candidates and Votes (Original logic)
+    all_candidates = ElectoralCandidate.query.all()
     vote_counts = db.session.query(
         Vote.candidate_id,
         db.func.count(Vote.id).label('vote_count')
@@ -1961,21 +1917,130 @@ def add_candidate():
 
     for candidate in all_candidates:
         position = candidate.position
-        candidate.vote_count = vote_dict.get(candidate.id, 0)  # Add vote_count dynamically
+        # Check if candidate has the vote_count property before setting (safety check for dynamic attribute)
+        if not hasattr(candidate, 'vote_count'):
+            candidate.vote_count = vote_dict.get(candidate.id, 0)
         
-        # NOTE: To use candidate.fullname and candidate.regno in the template, 
-        # the User model and its relationship MUST be loaded.
-        # You might need to add: candidate.fullname = candidate.user.fullname 
-        # and candidate.regno = candidate.user.regno 
-        # to the candidate object here if they aren't available via the template logic.
-
         if position not in candidates_by_position:
             candidates_by_position[position] = []
         candidates_by_position[position].append(candidate)
 
-    return render_template('admin_addcandidates.html', candidates_by_position=candidates_by_position)
+    return render_template(
+        'admin_addcandidates.html', 
+        candidates_by_position=candidates_by_position
+    )
 
 
+
+# ... (Rest of the file remains the same) ...
+@app.route('/edit_candidate/<int:candidate_id>', methods=['GET', 'POST'])
+def edit_candidate(candidate_id):
+    if 'admin_id' not in session:
+        flash("You must be logged in as admin to perform this action.", "warning")
+        return redirect(url_for('admin_login'))
+
+    candidate = ElectoralCandidate.query.get_or_404(candidate_id)
+
+    if request.method == 'POST':
+        # Handle form submission for editing
+        # --- Critical: Check for unique Registration Number when editing ---
+        new_regno = request.form['regno']
+        
+        # Check if the new regno is already taken by *another* candidate
+        if new_regno != candidate.regno:
+            duplicate = ElectoralCandidate.query.filter_by(regno=new_regno).first()
+            if duplicate:
+                flash("Registration number is already in use by another candidate.", "danger")
+                return redirect(url_for('edit_candidate', candidate_id=candidate.id))
+        
+        # Update fields
+        candidate.fullname = request.form['fullname']
+        candidate.regno = new_regno # Update the regno
+        candidate.position = request.form['position']
+        
+        # ... (Rest of the image handling logic is fine) ...
+        profile_pic = request.files['profile_pic']
+        
+        if profile_pic and profile_pic.filename:
+            # Delete old image
+            try:
+                old_path = os.path.join('static', 'uploads', candidate.profile_pic)
+                if os.path.exists(old_path):
+                    os.remove(old_path)
+            except Exception as e:
+                print(f"Error deleting old profile picture: {e}") 
+                
+            # Save new image
+            filename = secure_filename(profile_pic.filename)
+            upload_folder = os.path.join('static', 'uploads')
+            os.makedirs(upload_folder, exist_ok=True)
+            profile_path = os.path.join(upload_folder, filename)
+            profile_pic.save(profile_path)
+            candidate.profile_pic = filename
+            
+        try:
+            db.session.commit()
+            flash(f"Candidate **{candidate.fullname}** updated successfully.", "success")
+            return redirect(url_for('add_candidate'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f"Error updating candidate: {e}", "danger")
+            return redirect(url_for('edit_candidate', candidate_id=candidate.id))
+            
+    # GET request: render the edit form
+    return render_template('admin_editcandidate.html', candidate=candidate)
+
+# --- 🗳️ New Routes for Management ---
+
+@app.route('/delete_candidate/<int:candidate_id>', methods=['POST'])
+def delete_candidate(candidate_id):
+    if 'admin_id' not in session:
+        flash("You must be logged in as admin to perform this action.", "warning")
+        return redirect(url_for('admin_login'))
+
+    candidate = ElectoralCandidate.query.get_or_404(candidate_id)
+    
+    try:
+        # Delete candidate's votes first (optional, depending on DB foreign key constraints)
+        Vote.query.filter_by(candidate_id=candidate.id).delete()
+        
+        # Delete profile picture from file system
+        try:
+            profile_path = os.path.join('static', 'uploads', candidate.profile_pic)
+            if os.path.exists(profile_path):
+                os.remove(profile_path)
+        except Exception as e:
+            # Log the error, but don't stop the database deletion
+            print(f"Error deleting profile picture: {e}") 
+
+        # Delete the candidate record
+        db.session.delete(candidate)
+        db.session.commit()
+        flash(f"Candidate **{candidate.fullname}** deleted successfully.", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Error deleting candidate: {e}", "danger")
+        
+    return redirect(url_for('add_candidate'))
+
+
+    
+@app.route('/restart_election', methods=['POST'])
+def restart_election():
+    if 'admin_id' not in session:
+        flash("You must be logged in as admin to perform this action.", "warning")
+        return redirect(url_for('admin_login'))
+        
+    try:
+        # Delete ALL vote records
+        num_deleted = db.session.query(Vote).delete()
+        db.session.commit()
+        flash(f"**Election Restarted!** Successfully deleted **{num_deleted}** votes.", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Error restarting election: {e}", "danger")
+        
+    return redirect(url_for('add_candidate'))
 @app.route('/results')
 def results():
     if 'user_id' not in session:
@@ -2012,19 +2077,14 @@ def vote():
     if not user:
         flash("User not found.", "danger")
         return redirect(url_for('login'))
-    try:
-        dues_record = AdminAddDues.query.filter_by(regno=user.regno).first()
-    except Exception as e:
-                print(e)
+
+    dues_record = AdminAddDues.query.filter_by(regno=user.regno).first()
     if not dues_record:
         flash("You are not eligible to vote. Please ensure your dues are cleared.", "warning")
         return redirect(url_for('dashboard'))
 
     # Prevent multiple votes
-    try:
-        previous_votes = Vote.query.filter_by(user_id=user.id).first()
-    except Exception as e:
-                print(e)
+    previous_votes = Vote.query.filter_by(user_id=user.id).first()
     if previous_votes:
         flash("You have already voted.", "warning")
         return redirect(url_for('results'))
@@ -2153,21 +2213,6 @@ def admin_delete_project_idea(idea_id):
 
     return redirect(url_for('admin_project_ideas'))
 
-
-@app.route('/vote_timer')
-def vote_timer():
-    if 'user_id' not in session:
-        flash("Please log in or sign up to view the election results.", "warning")
-        return redirect(url_for('login'))
-
-    now = datetime.now()
-
-    if now < ELECTION_START:
-        return redirect(url_for('wait_page'))
-    elif ELECTION_START <= now <= ELECTION_END:
-        return render_template('vote_dashboard.html')  # Your actual voting page
-    else:
-        return redirect(url_for('results'))
 
 @app.route('/wait')
 def wait_page():
@@ -2341,56 +2386,6 @@ def admin_delete_lecturer(lecturer_id):
 
     return redirect(url_for('details'))
 
-# --- NEW: Edit Candidate Route ---
-@app.route("/admin/candidate/edit/<int:candidate_id>", methods=['GET', 'POST'])
-def admin_edit_candidate(candidate_id):
-    if 'admin_id' not in session:
-        flash("You must be logged in as admin to access this page.", "warning")
-        return redirect(url_for('admin_login'))
-
-    candidate = ElectoralCandidate.query.get_or_404(candidate_id)
-
-    if request.method == 'POST':
-        # Assuming you want to edit position and profile_pic
-        candidate.position = request.form.get('position')
-        candidate.profile_pic = request.form.get('profile_pic') # If you handle file uploads, this will be more complex
-
-        # If you linked candidate to user, you might want to edit user details via candidate.user
-        # For example:
-        # if candidate.user:
-        #     candidate.user.fullname = request.form.get('user_fullname')
-        #     candidate.user.email = request.form.get('user_email')
-        #     # ... and so on for other user fields
-
-        try:
-            db.session.commit()
-            flash(f"Candidate '{candidate.user.fullname if candidate.user else candidate.position}' updated successfully!", "success")
-            return redirect(url_for('details'))
-        except Exception as e:
-            db.session.rollback()
-            flash(f"Error updating candidate: {str(e)}", "danger")
-            print(f"Error updating candidate: {e}")
-
-    return render_template("admin_edit_candidate.html", candidate=candidate)
-
-# --- NEW: Delete Candidate Route ---
-@app.route("/admin/candidate/delete/<int:candidate_id>", methods=['POST'])
-def admin_delete_candidate(candidate_id):
-    if 'admin_id' not in session:
-        flash("You must be logged in as admin to access this page.", "warning")
-        return redirect(url_for('admin_login'))
-
-    candidate = ElectoralCandidate.query.get_or_404(candidate_id)
-
-    try:
-        db.session.delete(candidate)
-        db.session.commit()
-        flash(f"Candidate '{candidate.user.fullname if candidate.user else candidate.position}' deleted successfully!", "success")
-    except Exception as e:
-        db.session.rollback()
-        flash(f"Error deleting candidate: {str(e)}", "danger")
-
-    return redirect(url_for('details'))
 
 
 
@@ -3128,16 +3123,10 @@ def lecturer_signup():
             return jsonify({'message': 'Invalid email format.'}), 400
 
         # Check if email or staff_id already exists
-        try:
-            if Lecturer.query.filter_by(email=email).first():
-                return jsonify({'message': 'Email already registered.'}), 400
-        except Exception as e:
-                    print(e)
-        try:
-            if Lecturer.query.filter_by(staff_id=staff_id).first():
-                return jsonify({'message': 'Staff ID already registered.'}), 400
-        except Exception as e:
-                    print(e)
+        if Lecturer.query.filter_by(email=email).first():
+            return jsonify({'message': 'Email already registered.'}), 400
+        if Lecturer.query.filter_by(staff_id=staff_id).first():
+            return jsonify({'message': 'Staff ID already registered.'}), 400
 
         # Hash the password
         hashed_password = generate_password_hash(password)
@@ -3227,10 +3216,13 @@ def lecturer_dashboard():
 
 
 
-
-
-with app.app_context():
-    db.create_all()
-
 if __name__ == '__main__':
+    # Context manager needed for Flask extensions like SQLAlchemy to work outside of a request
+    with app.app_context():
+        # CRITICAL: Create all database tables based on the models defined in your app.
+        # This line should typically be run just once when setting up the environment.
+        db.create_all() 
+        print("Database tables created or already exist!")
+        
+    # Start the Flask development server
     app.run(debug=True)
